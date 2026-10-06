@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">LockTask</string>
+    <string name="app_description">不错过任何重要的事情</string>
+    <string name="add_task_title_hint">Task</string>
+    <string name="add_task_title_placeholder">有新的任务了吗</string>
+    <string name="add_task_lock_screen_btn_tooltip">开启该功能时，在创建任务后应用会自动生成一条常驻的锁屏通知，直到任务被完成或者被取消。\n功能默认处于开启状态。</string>
+    <string name="create_task">创建</string>
 </resources>
