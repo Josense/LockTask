@@ -1,10 +1,9 @@
-package com.josense.locktask
+package com.josense.locktask.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,7 +22,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.josense.locktask.ui.page.AddTaskSheet
+import com.josense.locktask.R
+import com.josense.locktask.ui.page.create.CreateTaskSheet
 import com.josense.locktask.ui.page.HomeScreen
 import com.josense.locktask.ui.theme.LockTaskTheme
 
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     HomeScreen(modifier = Modifier.padding(innerPadding))
                     if (showAddTaskSheet) {
-                        AddTaskSheet(
+                        CreateTaskSheet(
                             onDismiss = { showAddTaskSheet = false },
                             sheetState = addTaskSheetState
                         )

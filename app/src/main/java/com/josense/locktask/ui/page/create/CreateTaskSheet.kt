@@ -1,4 +1,4 @@
-package com.josense.locktask.ui.page
+package com.josense.locktask.ui.page.create
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -33,16 +34,21 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.josense.locktask.R
+import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.theme.PageGap
 import com.josense.locktask.ui.theme.TextFieldPadding
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTaskSheet(
+fun CreateTaskSheet(
     onDismiss: () -> Unit,
     sheetState: SheetState,
 ) {
+    val createTaskViewModel: CreateTaskViewModel = koinViewModel()
+    val coroutineScope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -62,7 +68,14 @@ fun AddTaskSheet(
             // 功能按钮区
             TaskFuncBtnRow(
                 needLockNotify = needLockNotify,
-                updateLockNotify = { needLockNotify = !needLockNotify }
+                updateLockNotify = { needLockNotify = !needLockNotify },
+                onCreated = {
+                    createTaskViewModel.createTask(Task(title = textInput, needLockNotify = needLockNotify))
+                    coroutineScope.launch { sheetState.hide() }
+                        .invokeOnCompletion {
+                            if (!sheetState.isVisible) onDismiss()
+                        }
+                }
             )
         }
     }
@@ -95,6 +108,7 @@ fun TaskTitleInputField(
 fun TaskFuncBtnRow(
     needLockNotify: Boolean,
     updateLockNotify: (Boolean) -> Unit,
+    onCreated: () -> Unit,
 ) {
 
     val tooltipState = rememberTooltipState()
@@ -125,7 +139,7 @@ fun TaskFuncBtnRow(
             }
         }
 
-        Button(onClick = {}) {
+        Button(onClick = onCreated) {
             Text(text = stringResource(R.string.create_task))
         }
     }
