@@ -3,9 +3,7 @@ package com.josense.locktask.ui.page
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
@@ -13,7 +11,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -38,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import com.josense.locktask.R
 import com.josense.locktask.ui.theme.PageGap
 import com.josense.locktask.ui.theme.TextFieldPadding
-import com.josense.locktask.ui.theme.customDisabled
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,59 +49,84 @@ fun AddTaskSheet(
     ) {
         var textInput by remember { mutableStateOf("") }
         var needLockNotify by remember { mutableStateOf(true) }
-        val tooltipState = rememberTooltipState()
 
-        val focusRequester = remember { FocusRequester() }
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
-
-        Column {
-            OutlinedTextField(
-                value = textInput,
-                onValueChange = { textInput = it },
-                label = { Text(stringResource(R.string.add_task_title_hint)) },
-                placeholder = { Text(stringResource(R.string.add_task_title_placeholder)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(TextFieldPadding)
-                    .focusRequester(focusRequester)
+        Column(
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
+            // 正文输入区
+            TaskTitleInputField(
+                currentInput = textInput,
+                updateInput = { textInput = it }
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = PageGap),
-                horizontalArrangement = Arrangement.SpaceBetween,
+            // 功能按钮区
+            TaskFuncBtnRow(
+                needLockNotify = needLockNotify,
+                updateLockNotify = { needLockNotify = !needLockNotify }
+            )
+        }
+    }
+}
+
+@Composable
+fun TaskTitleInputField(
+    currentInput: String,
+    updateInput: (String) -> Unit,
+) {
+
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+    OutlinedTextField(
+        value = currentInput,
+        onValueChange = updateInput,
+        label = { Text(stringResource(R.string.add_task_title_hint)) },
+        placeholder = { Text(stringResource(R.string.add_task_title_placeholder)) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(TextFieldPadding)
+            .focusRequester(focusRequester)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaskFuncBtnRow(
+    needLockNotify: Boolean,
+    updateLockNotify: (Boolean) -> Unit,
+) {
+
+    val tooltipState = rememberTooltipState()
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = PageGap),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+            tooltip = {
+                PlainTooltip(
+                    containerColor = MaterialTheme.colorScheme.inverseSurface
+                ) {
+                    Text(stringResource(R.string.add_task_lock_screen_btn_tooltip))
+                }
+            },
+            state = tooltipState,
+
             ) {
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = {
-                        PlainTooltip(
-                            containerColor = MaterialTheme.colorScheme.inverseSurface
-                        ) {
-                            Text(stringResource(R.string.add_task_lock_screen_btn_tooltip))
-                        }
-                    },
-                    state = tooltipState,
-
-                    ) {
-                    FilledIconToggleButton(
-                        checked = needLockNotify,
-                        onCheckedChange = { needLockNotify = !needLockNotify }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = null,
-                        )
-                    }
-                }
-
-                Button(onClick = {}) {
-                    Text(text = stringResource(R.string.create_task))
-                }
+            FilledIconToggleButton(
+                checked = needLockNotify,
+                onCheckedChange = updateLockNotify
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = null,
+                )
             }
+        }
 
-
-            Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {}) {
+            Text(text = stringResource(R.string.create_task))
         }
     }
 }
