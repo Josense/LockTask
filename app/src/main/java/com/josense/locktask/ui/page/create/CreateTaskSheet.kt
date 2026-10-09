@@ -14,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,11 +23,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.josense.locktask.R
@@ -35,6 +38,10 @@ import com.josense.locktask.ui.components.LockNotifyIconBtnWithTooltip
 import com.josense.locktask.ui.theme.PageGap
 import com.josense.locktask.ui.theme.TextFieldPadding
 import com.josense.locktask.ui.theme.extendedTypography
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -60,7 +67,8 @@ fun CreateTaskSheet(
             // 正文输入区
             TaskTitleInputField(
                 currentInput = textInput,
-                updateInput = { textInput = it }
+                updateInput = { textInput = it },
+                sheetState = sheetState,
             )
 
             // 功能按钮区
@@ -80,15 +88,21 @@ fun CreateTaskSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskTitleInputField(
     currentInput: String,
     updateInput: (String) -> Unit,
+    sheetState: SheetState,
 ) {
 
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(sheetState, focusRequester) {
+        snapshotFlow { !sheetState.isAnimationRunning && sheetState.currentValue == SheetValue.Expanded }
+            .first { it }
+
         focusRequester.requestFocus()
+
     }
     BasicTextField(
         value = currentInput,
