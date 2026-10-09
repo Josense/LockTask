@@ -24,7 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.josense.locktask.R
 import com.josense.locktask.ui.page.create.CreateTaskSheet
-import com.josense.locktask.ui.page.HomeScreen
+import com.josense.locktask.ui.page.home.HomeScreen
 import com.josense.locktask.ui.theme.LockTaskTheme
 
 class MainActivity : ComponentActivity() {
