@@ -18,4 +18,17 @@ class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
     override suspend fun insertTask(task: Task) = taskDao.insert(task.toEntity())
 
     override suspend fun updateTask(task: Task) = taskDao.update(task.toEntity())
+
+    override suspend fun completeTask(task: Task, isCompleted: Boolean) {
+        val updatedTask = task.copy(isCompleted = isCompleted)
+        taskDao.update(updatedTask.toEntity())
+    }
+
+    override suspend fun deleteTaskSoftly(task: Task) {
+        val deletedTask = task.copy(isDeleted = true)
+        taskDao.update(deletedTask.toEntity())
+    }
+    override suspend fun clearTrash() {
+        taskDao.clearTrash()
+    }
 }

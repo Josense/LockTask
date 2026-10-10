@@ -9,4 +9,11 @@ interface TaskRepository {
     suspend fun insertTask(task: Task)
 
     suspend fun updateTask(task: Task)
+
+    suspend fun completeTask(task: Task, isCompleted: Boolean = true)
+
+    suspend fun deleteTaskSoftly(task: Task)
+
+    suspend fun clearTrash()
+
 }
