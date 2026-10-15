@@ -15,7 +15,7 @@ class HomeViewModel(
     private val taskRepository: TaskRepository
 ): ViewModel() {
 
-    val taskListState: StateFlow<List<Task>> = taskRepository.getAllTasks()
+    val taskListState: StateFlow<List<Task>> = taskRepository.getAllActiveTasks()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

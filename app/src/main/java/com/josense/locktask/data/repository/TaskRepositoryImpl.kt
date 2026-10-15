@@ -15,6 +15,16 @@ class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
         }
     }
 
+    override fun getAllActiveTasks(): Flow<List<Task>> {
+        return taskDao.getActiveTasks().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun getTaskById(taskId: Int): Flow<Task?> {
+        return taskDao.getTaskById(taskId).map { it?.toDomain() }
+    }
+
     override suspend fun insertTask(task: Task) = taskDao.insert(task.toEntity())
 
     override suspend fun updateTask(task: Task) = taskDao.update(task.toEntity())

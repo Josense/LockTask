@@ -1,6 +1,6 @@
 package com.josense.locktask.domain.model
 
-import androidx.room.PrimaryKey
+
 import java.util.Date
 
 data class Task(

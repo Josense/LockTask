@@ -42,7 +42,7 @@ interface TaskDao {
 
     /** 查询 */
     @Query("SELECT * FROM task_table WHERE id = :taskId LIMIT 1")
-    abstract suspend fun getTaskById(taskId: Int): TaskEntity?
+    abstract fun getTaskById(taskId: Int): Flow<TaskEntity?>
 
     @Query("SELECT * FROM task_table WHERE isCompleted = 0 AND isDeleted = 0 ORDER BY createAt DESC")
     abstract fun getActiveTasks(): Flow<List<TaskEntity>>

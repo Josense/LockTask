@@ -1,5 +1,6 @@
 package com.josense.locktask.ui.page.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,13 +27,14 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    onTaskClick: (Task) -> Unit = {},
 ) {
     val homeViewModel: HomeViewModel = koinViewModel()
 
     val taskList by homeViewModel.taskListState.collectAsStateWithLifecycle()
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -45,7 +47,7 @@ fun HomeScreen(
                 taskList,
                 key = { task -> task.id }
             ) { task ->
-                TaskItem(task = task)
+                TaskItem(task = task, onTaskClick = onTaskClick)
             }
         }
     }
@@ -65,9 +67,13 @@ fun EmptyHomeScreen() {
 @Composable
 fun TaskItem(
     task: Task,
+    onTaskClick: (Task) -> Unit = {},
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .clickable(onClick = {
+                onTaskClick(task)
+            }),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         LockNotifyIconBtn(

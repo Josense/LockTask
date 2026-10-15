@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -62,6 +63,10 @@ dependencies {
     // koin
     implementation(libs.io.insert.koin)
     implementation(libs.io.insert.koin.compose)
+
+    // navigation
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.jetbrains.kotlinx.serialization)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)

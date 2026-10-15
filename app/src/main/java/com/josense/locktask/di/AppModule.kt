@@ -6,6 +6,7 @@ import com.josense.locktask.data.repository.TaskRepositoryImpl
 import com.josense.locktask.domain.repository.TaskRepository
 import com.josense.locktask.ui.page.create.CreateTaskViewModel
 import com.josense.locktask.ui.page.home.HomeViewModel
+import com.josense.locktask.ui.page.task_detail.TaskDetailViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -33,4 +34,5 @@ val appModule = module {
     viewModelOf(::CreateTaskViewModel)
 
     viewModelOf(::HomeViewModel)
+    viewModelOf(::TaskDetailViewModel)
 }
