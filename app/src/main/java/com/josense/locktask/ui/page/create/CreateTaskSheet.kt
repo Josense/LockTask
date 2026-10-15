@@ -137,7 +137,7 @@ fun TaskTitleInputField(
 fun TaskFuncBtnRow(
     enableCreate: Boolean,
     needLockNotify: Boolean,
-    updateLockNotify: (Boolean) -> Unit,
+    updateLockNotify: () -> Unit,
     onCreated: () -> Unit,
 ) {
     Row(

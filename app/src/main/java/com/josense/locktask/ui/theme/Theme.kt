@@ -1,46 +1,65 @@
 package com.josense.locktask.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = AppLight,
+    onPrimary = AppDark,
+    primaryContainer = AppDark,
+    onPrimaryContainer = AppLight,
+    secondary = AppLight,
+    onSecondary = AppDark,
+    secondaryContainer = AppDark,
+    onSecondaryContainer = AppLight,
+    tertiary = AppLight,
+    onTertiary = AppDark,
+    background = AppDark,
+    onBackground = AppLight,
+    surface = AppDark,
+    onSurface = AppLight,
+    surfaceVariant = AppDark,
+    onSurfaceVariant = AppLight,
+    outline = AppLight,
+    inverseSurface = AppLight,
+    inverseOnSurface = AppDark,
+    inversePrimary = AppDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
+    primary = AppDark,
+    onPrimary = AppLight,
+    primaryContainer = AppLight,
+    onPrimaryContainer = AppDark,
+    secondary = AppDark,
+    onSecondary = AppLight,
+    secondaryContainer = AppLight,
+    onSecondaryContainer = AppDark,
+    tertiary = AppDark,
+    onTertiary = AppLight,
+    background = AppLight,
+    onBackground = AppDark,
+    surface = AppLight,
+    onSurface = AppDark,
+    surfaceVariant = AppLight,
+    onSurfaceVariant = AppDark,
+    outline = AppDark,
+    inverseSurface = AppDark,
+    inverseOnSurface = AppLight,
+    inversePrimary = AppLight
 )
 
 @Composable
 fun LockTaskTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     extendedTypography: ExtendedTypography = ExtendedTypography(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     CompositionLocalProvider(
         LocalExtendedTypography provides extendedTypography
     ) {
