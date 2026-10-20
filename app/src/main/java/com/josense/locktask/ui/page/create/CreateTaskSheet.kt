@@ -1,20 +1,17 @@
 package com.josense.locktask.ui.page.create
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,9 +24,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.josense.locktask.R
@@ -38,9 +37,6 @@ import com.josense.locktask.ui.components.LockNotifyIconBtnWithTooltip
 import com.josense.locktask.ui.theme.PageGap
 import com.josense.locktask.ui.theme.TextFieldPadding
 import com.josense.locktask.ui.theme.extendedTypography
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -61,6 +57,19 @@ fun CreateTaskSheet(
         var textInput by remember { mutableStateOf("") }
         var needLockNotify by remember { mutableStateOf(true) }
 
+        val focusRequester = remember { FocusRequester() }
+        val focusManager = LocalFocusManager.current
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val windowInfo = LocalWindowInfo.current
+        var inputPlaced by remember { mutableStateOf(false) }
+
+        LaunchedEffect(focusRequester, windowInfo) {
+            snapshotFlow { inputPlaced && windowInfo.isWindowFocused }
+                .first { it }
+
+            focusRequester.requestFocus()
+        }
+
         Column(
             modifier = Modifier.padding(bottom = 16.dp)
         ) {
@@ -68,7 +77,11 @@ fun CreateTaskSheet(
             TaskTitleInputField(
                 currentInput = textInput,
                 updateInput = { textInput = it },
-                sheetState = sheetState,
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .onGloballyPositioned {
+                        inputPlaced = it.size.width > 0 && it.size.height > 0
+                    },
             )
 
             // 功能按钮区
@@ -78,41 +91,35 @@ fun CreateTaskSheet(
                 updateLockNotify = { needLockNotify = !needLockNotify },
                 onCreated = {
                     createTaskViewModel.createTask(Task(title = textInput, needLockNotify = needLockNotify))
-                    coroutineScope.launch { sheetState.hide() }
-                        .invokeOnCompletion {
-                            if (!sheetState.isVisible) onDismiss()
-                        }
+                    focusManager.clearFocus(force = true)
+                    keyboardController?.hide()
+
+                    coroutineScope.launch {
+                        sheetState.hide()
+                        if (!sheetState.isVisible) onDismiss()
+                    }
                 }
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskTitleInputField(
     currentInput: String,
     updateInput: (String) -> Unit,
-    sheetState: SheetState,
+    modifier: Modifier = Modifier,
+
 ) {
 
-    val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(sheetState, focusRequester) {
-        snapshotFlow { !sheetState.isAnimationRunning && sheetState.currentValue == SheetValue.Expanded }
-            .first { it }
-
-        focusRequester.requestFocus()
-
-    }
     BasicTextField(
         value = currentInput,
         onValueChange = updateInput,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(TextFieldPadding)
-            .focusRequester(focusRequester),
+            .padding(TextFieldPadding),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier.fillMaxWidth()

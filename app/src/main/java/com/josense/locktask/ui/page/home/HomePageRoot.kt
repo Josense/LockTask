@@ -32,7 +32,9 @@ fun HomePageRoot(
 ) {
 
     var showAddTaskSheet by remember { mutableStateOf(false) }
-    val addTaskSheetState = rememberModalBottomSheetState()
+    val addTaskSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
