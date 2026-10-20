@@ -6,9 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.DoneOutline
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -62,9 +61,9 @@ fun TaskDetailRoot(
                             onBackClick()
                         }) {
                             Icon(
-                                imageVector = Icons.Outlined.DoneOutline,
-                                contentDescription = stringResource(R.string.back),
-                                tint = MaterialTheme.colorScheme.onSurface,
+                                imageVector = Icons.Outlined.Done,
+                                contentDescription = stringResource(R.string.complete),
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                         IconButton(onClick = {
