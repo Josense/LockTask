@@ -71,18 +71,11 @@ fun TaskItem(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .clickable(onClick = {
-                onTaskClick(task)
-            }),
+            .clickable { onTaskClick(task) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        LockNotifyStatus(
-            needLockNotify = task.needLockNotify,
-        )
+        LockNotifyStatus(needLockNotify = task.needLockNotify)
         Spacer(modifier = Modifier.padding(4.dp))
-
-        Text(
-            text = task.title,
-        )
+        Text(text = task.title)
     }
 }
