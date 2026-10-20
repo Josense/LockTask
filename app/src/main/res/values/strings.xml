@@ -3,7 +3,10 @@
     <string name="app_description">不错过任何重要的事情</string>
     <string name="add_task_title_hint">Task</string>
     <string name="add_task_title_placeholder">有新的任务了吗</string>
-    <string name="add_task_lock_screen_btn_tooltip">开启该功能时，在创建任务后应用会自动生成一条常驻的锁屏通知，直到任务被完成或者被取消。\n功能默认处于开启状态。</string>
+    <string name="lock_notify_label">锁屏常驻提醒</string>
+    <string name="lock_notify_description">在锁屏上保留此任务，直到完成或取消</string>
+    <string name="lock_notify_enabled">锁屏提醒已开启</string>
+    <string name="lock_notify_disabled">锁屏提醒已关闭</string>
     <string name="create_task">创建</string>
     <string name="no_not_completed_task">没有待完成的任务</string>
     <string name="complete">完成</string>
@@ -13,4 +16,10 @@
     <string name="no_task">任务不见了</string>
     <string name="input_sheet_title">输入</string>
     <string name="dismiss_input_sheet">关闭输入面板</string>
+    <string name="create_with_lock_notify">创建并常驻锁屏</string>
+    <string name="create_in_app_only">仅创建任务</string>
+    <string name="in_app_only_label">仅应用内任务</string>
+    <string name="in_app_only_description">只保存在应用内，不显示锁屏提醒</string>
+    <string name="switch_to_in_app_only">切换为仅应用内任务</string>
+    <string name="switch_to_lock_notify">切换为锁屏常驻提醒</string>
 </resources>

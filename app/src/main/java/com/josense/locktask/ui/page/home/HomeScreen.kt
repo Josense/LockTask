@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.josense.locktask.R
 import com.josense.locktask.domain.model.Task
-import com.josense.locktask.ui.components.LockNotifyIconBtn
+import com.josense.locktask.ui.components.LockNotifyStatus
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -76,7 +76,7 @@ fun TaskItem(
             }),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        LockNotifyIconBtn(
+        LockNotifyStatus(
             needLockNotify = task.needLockNotify,
         )
         Spacer(modifier = Modifier.padding(4.dp))

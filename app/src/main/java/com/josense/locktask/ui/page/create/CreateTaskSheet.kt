@@ -1,12 +1,10 @@
 package com.josense.locktask.ui.page.create
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +17,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import com.josense.locktask.R
 import com.josense.locktask.domain.model.Task
-import com.josense.locktask.ui.components.LockNotifyIconBtnWithTooltip
+import com.josense.locktask.ui.components.TaskCreateButton
 import com.josense.locktask.ui.components.input.KeyboardInputSheet
 import com.josense.locktask.ui.theme.PageGap
 import com.josense.locktask.ui.theme.TextFieldPadding
@@ -97,19 +95,13 @@ fun TaskFuncBtnRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = PageGap),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End,
     ) {
-        LockNotifyIconBtnWithTooltip(
-            enable = true,
-            needLockNotify = needLockNotify,
-            updateLockNotify = updateLockNotify
-        )
-
-        Button(
+        TaskCreateButton(
             enabled = enableCreate,
-            onClick = onCreated
-        ) {
-            Text(text = stringResource(R.string.create_task))
-        }
+            needLockNotify = needLockNotify,
+            onModeSelected = { if (it != needLockNotify) updateLockNotify() },
+            onCreate = onCreated,
+        )
     }
 }
