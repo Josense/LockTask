@@ -62,7 +62,7 @@ fun TaskTitleInputField(
         value = currentInput,
         onValueChange = updateInput,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        textStyle = MaterialTheme.typography.bodyLarge,
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
         modifier = modifier
             .fillMaxWidth()
             .padding(TextFieldPadding),
@@ -74,6 +74,7 @@ fun TaskTitleInputField(
                     if (currentInput.isEmpty()) {
                         Text(
                             text = stringResource(R.string.add_task_title_placeholder),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.extendedTypography.placeholderLarge
                         )
                     }

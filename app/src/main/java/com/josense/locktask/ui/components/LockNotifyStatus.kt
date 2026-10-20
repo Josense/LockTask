@@ -10,7 +10,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.josense.locktask.R
-import com.josense.locktask.ui.theme.customDisabled
 
 @Composable
 fun LockNotifyStatus(needLockNotify: Boolean) {
@@ -21,6 +20,6 @@ fun LockNotifyStatus(needLockNotify: Boolean) {
         ),
         modifier = Modifier.padding(12.dp).size(24.dp),
         tint = if (needLockNotify) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.customDisabled,
+            else MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

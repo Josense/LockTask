@@ -41,6 +41,7 @@ fun HomePageRoot(
                     )
                     Text(
                         text = stringResource(R.string.app_description),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
