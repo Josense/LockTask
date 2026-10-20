@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,23 +32,40 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = koinViewModel()
 
-    val taskList by homeViewModel.taskListState.collectAsStateWithLifecycle()
+    val state by homeViewModel.state.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        if (taskList.isEmpty()) {
-            item {
-                EmptyHomeScreen()
+    HomeScreen(
+        state = state,
+        modifier = modifier,
+        onAction = { action ->
+            when (action) {
+                is HomeAction.TaskClick -> onTaskClick(action.task)
             }
-        } else {
-            items(
-                taskList,
-                key = { task -> task.id }
-            ) { task ->
-                TaskItem(task = task, onTaskClick = onTaskClick)
+        },
+    )
+}
+
+@Composable
+fun HomeScreen(
+    state: HomeState,
+    modifier: Modifier = Modifier,
+    onAction: (HomeAction) -> Unit = {},
+) {
+    when (state) {
+        HomeState.Loading -> Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator()
+        }
+        HomeState.Empty -> EmptyHomeScreen(modifier)
+        is HomeState.Content -> LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(state.tasks, key = { task -> task.id }) { task ->
+                TaskItem(task = task, onTaskClick = { onAction(HomeAction.TaskClick(it)) })
             }
         }
     }
@@ -55,9 +73,9 @@ fun HomeScreen(
 
 
 @Composable
-fun EmptyHomeScreen() {
+fun EmptyHomeScreen(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Text(text = stringResource(R.string.no_not_completed_task))
