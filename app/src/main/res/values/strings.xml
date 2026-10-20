@@ -11,4 +11,6 @@
     <string name="back">返回</string>
     <string name="task_detail">任务详情</string>
     <string name="no_task">任务不见了</string>
+    <string name="input_sheet_title">输入</string>
+    <string name="dismiss_input_sheet">关闭输入面板</string>
 </resources>
