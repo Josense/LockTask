@@ -9,6 +9,7 @@
     <string name="lock_notify_disabled">锁屏提醒已关闭</string>
     <string name="create_task">创建</string>
     <string name="no_not_completed_task">没有待完成的任务</string>
+    <string name="home_list_end">已经到底了</string>
     <string name="complete">完成</string>
     <string name="delete">删除</string>
     <string name="back">返回</string>

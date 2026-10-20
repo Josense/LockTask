@@ -13,11 +13,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.josense.locktask.R
@@ -66,6 +68,15 @@ fun HomeScreen(
         ) {
             items(state.tasks, key = { task -> task.id }) { task ->
                 TaskItem(task = task, onTaskClick = { onAction(HomeAction.TaskClick(it)) })
+            }
+            item(key = "home_list_footer") {
+                Text(
+                    text = stringResource(R.string.home_list_end),
+                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 88.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }
