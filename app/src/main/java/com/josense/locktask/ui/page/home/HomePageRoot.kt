@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import com.josense.locktask.R
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.page.create.CreateTaskSheet
-import com.josense.locktask.ui.theme.LockTaskTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,9 +30,6 @@ fun HomePageRoot(
 ) {
 
     var showAddTaskSheet by remember { mutableStateOf(false) }
-    val addTaskSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -61,7 +56,6 @@ fun HomePageRoot(
         if (showAddTaskSheet) {
             CreateTaskSheet(
                 onDismiss = { showAddTaskSheet = false },
-                sheetState = addTaskSheetState
             )
         }
     }
