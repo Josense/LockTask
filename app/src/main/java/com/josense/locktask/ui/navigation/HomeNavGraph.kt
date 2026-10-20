@@ -1,5 +1,11 @@
 package com.josense.locktask.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,7 +21,12 @@ fun HomeNavGraph(
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = Home
+        startDestination = Home,
+        popEnterTransition = { AppNavTransitions.DefaultEnter },
+        popExitTransition = { AppNavTransitions.DefaultExit },
+        // 手势返回：使用相同效果，由导航系统处理进度与取消
+        predictivePopEnterTransition = { AppNavTransitions.DefaultEnter },
+        predictivePopExitTransition = { AppNavTransitions.DefaultExit }
     ) {
         composable<Home> {
             HomePageRoot(onTaskClick = { task ->
