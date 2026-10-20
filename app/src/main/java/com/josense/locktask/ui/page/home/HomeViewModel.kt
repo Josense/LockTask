@@ -4,27 +4,41 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.josense.locktask.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class HomeViewModel(taskRepository: TaskRepository) : ViewModel() {
-    private val pendingAnchorTaskId = MutableStateFlow<Int?>(null)
-    val state = combine(
-        taskRepository.getAllActiveTasks().map { tasks ->
-            if (tasks.isEmpty()) HomeListState.Empty else HomeListState.Content(tasks)
-        },
-        pendingAnchorTaskId,
-    ) { list, taskId -> HomeState(list, taskId) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeState())
+    private val mutableState = MutableStateFlow(HomeState())
+    val state = flow {
+        coroutineScope {
+            launch {
+                taskRepository.getAllActiveTasks().collect { tasks ->
+                    mutableState.update { it.withTasks(tasks) }
+                }
+            }
+            emitAll(mutableState)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeState())
 
     fun onAction(action: HomeAction) {
         when (action) {
-            is HomeAction.AnchorTask -> pendingAnchorTaskId.value = action.taskId
-            is HomeAction.AnchorHandled -> pendingAnchorTaskId.update {
-                if (it == action.taskId) null else it
+            is HomeAction.AnchorTask -> mutableState.update { it.copy(pendingAnchorTaskId = action.taskId) }
+            is HomeAction.AnchorHandled -> mutableState.update {
+                if (it.pendingAnchorTaskId == action.taskId) it.copy(pendingAnchorTaskId = null) else it
+            }
+            is HomeAction.RemovalFinished -> mutableState.update { current ->
+                val removedIds = action.taskIds intersect current.removingTaskIds
+                val tasks = (current.list as? HomeListState.Content)?.tasks.orEmpty()
+                    .filterNot { it.id in removedIds }
+                current.copy(
+                    list = if (tasks.isEmpty()) HomeListState.Empty else HomeListState.Content(tasks),
+                    removingTaskIds = current.removingTaskIds - removedIds,
+                )
             }
             is HomeAction.TaskClick -> Unit
         }

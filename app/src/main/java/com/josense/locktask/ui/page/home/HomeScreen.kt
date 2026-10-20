@@ -18,6 +18,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,6 +35,7 @@ import com.josense.locktask.R
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.components.LockNotifyStatus
 import org.koin.androidx.compose.koinViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun HomeScreen(
@@ -60,6 +68,20 @@ fun HomeScreen(
     val tasks = (state.list as? HomeListState.Content)?.tasks.orEmpty()
     val taskId = state.pendingAnchorTaskId
     val targetIndex = tasks.indexOfFirst { it.id == taskId }
+    val removingIds = state.removingTaskIds
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    var exiting by remember(removingIds) { mutableStateOf(false) }
+    LaunchedEffect(removingIds, lifecycle) {
+        if (removingIds.isNotEmpty()) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                exiting = false
+                delay(TaskRemovalTiming.HOLD_MILLIS.milliseconds)
+                exiting = true
+                delay(TaskRemovalTiming.REMOVAL_ACK_DELAY_MILLIS.milliseconds)
+                onAction(HomeAction.RemovalFinished(removingIds))
+            }
+        }
+    }
     LaunchedEffect(taskId, targetIndex) {
         if (taskId != null && targetIndex >= 0) {
             listState.animateScrollToItem(targetIndex)
@@ -81,7 +103,13 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(list.tasks, key = { task -> task.id }) { task ->
-                TaskItem(task = task, onTaskClick = { onAction(HomeAction.TaskClick(it)) })
+                RemovingTaskItem(visible = !(exiting && task.id in removingIds)) {
+                    TaskItem(
+                        task = task,
+                        enabled = task.id !in removingIds,
+                        onTaskClick = { onAction(HomeAction.TaskClick(it)) },
+                    )
+                }
             }
             item(key = "home_list_footer") {
                 Text(
@@ -110,11 +138,12 @@ fun EmptyHomeScreen(modifier: Modifier = Modifier) {
 @Composable
 fun TaskItem(
     task: Task,
+    enabled: Boolean = true,
     onTaskClick: (Task) -> Unit = {},
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .clickable { onTaskClick(task) },
+            .clickable(enabled = enabled) { onTaskClick(task) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         LockNotifyStatus(needLockNotify = task.needLockNotify)

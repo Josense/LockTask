@@ -16,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -127,13 +128,85 @@ class TaskCreationFlowTest {
         assertNull(home.state.value.pendingAnchorTaskId)
     }
 
+    @Test
+    fun `repository removal retains original order until animation is acknowledged`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val tasks = (1..3).map { Task(id = it, title = "Task $it") }
+        repository.tasks.value = tasks
+        runCurrent()
+        repository.tasks.value = listOf(tasks[0], tasks[2])
+        runCurrent()
+        assertEquals(tasks, (home.state.value.list as HomeListState.Content).tasks)
+        assertEquals(setOf(2), home.state.value.removingTaskIds)
+        home.onAction(HomeAction.RemovalFinished(setOf(2)))
+        runCurrent()
+        assertEquals(listOf(tasks[0], tasks[2]), (home.state.value.list as HomeListState.Content).tasks)
+        assertTrue(home.state.value.removingTaskIds.isEmpty())
+    }
+
+    @Test
+    fun `last row stays until removal animation finishes`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val task = Task(id = 1, title = "Last")
+        repository.tasks.value = listOf(task)
+        runCurrent()
+        repository.tasks.value = emptyList()
+        runCurrent()
+        assertEquals(listOf(task), (home.state.value.list as HomeListState.Content).tasks)
+        assertEquals(setOf(1), home.state.value.removingTaskIds)
+        home.onAction(HomeAction.RemovalFinished(setOf(1)))
+        runCurrent()
+        assertEquals(HomeListState.Empty, home.state.value.list)
+    }
+
+    @Test
+    fun `background updates preserve pending rows and ignore stale removal acknowledgement`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val tasks = (1..4).map { Task(id = it, title = "Task $it") }
+        repository.tasks.value = tasks
+        runCurrent()
+        repository.tasks.value = listOf(tasks[0], tasks[3])
+        runCurrent()
+        assertEquals(tasks, (home.state.value.list as HomeListState.Content).tasks)
+        assertEquals(setOf(2, 3), home.state.value.removingTaskIds)
+        // A task restored before its exit completes must survive the old callback.
+        repository.tasks.value = listOf(tasks[0], tasks[1], tasks[3])
+        runCurrent()
+        home.onAction(HomeAction.RemovalFinished(setOf(2, 3)))
+        runCurrent()
+        assertEquals(listOf(tasks[0], tasks[1], tasks[3]), (home.state.value.list as HomeListState.Content).tasks)
+    }
+
+    @Test
+    fun `home starts loading on subscription and retains rows across a long detail visit`() = runTest(dispatcher) {
+        runCurrent()
+        assertEquals(0, repository.activeSubscriptions)
+        assertEquals(HomeListState.Loading, home.state.value.list)
+        val task = Task(id = 1, title = "Task")
+        repository.tasks.value = listOf(task)
+        val collector = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        runCurrent()
+        assertEquals(1, repository.activeSubscriptions)
+        collector.cancel()
+        advanceTimeBy(6000)
+        runCurrent()
+        repository.tasks.value = emptyList()
+        runCurrent()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        runCurrent()
+        assertEquals(2, repository.activeSubscriptions)
+        assertEquals(listOf(task), (home.state.value.list as HomeListState.Content).tasks)
+        assertEquals(setOf(1), home.state.value.removingTaskIds)
+    }
+
     private class FakeRepository : TaskRepository {
         val tasks = MutableStateFlow<List<Task>>(emptyList())
         var result = CompletableDeferred<Int>()
         var insertCount = 0
         var inserted: Task? = null
+        var activeSubscriptions = 0
         override fun getAllTasks() = tasks
-        override fun getAllActiveTasks() = tasks
+        override fun getAllActiveTasks() = tasks.onStart { activeSubscriptions++ }
         override fun getTaskById(taskId: Int) = flowOf<Task?>(null)
         override suspend fun insertTask(task: Task): Int {
             insertCount++

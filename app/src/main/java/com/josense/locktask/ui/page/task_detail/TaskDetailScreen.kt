@@ -35,7 +35,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun TaskDetailRoot(
     viewModel: TaskDetailViewModel = koinViewModel(),
-    onBackClick: (result: TaskDetailResult?) -> Unit,
+    onBackClick: () -> Unit,
 ) {
     val state = viewModel.taskListState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -59,7 +59,7 @@ fun TaskDetailRoot(
                     actions = {
                         IconButton(onClick = {
                             viewModel.onAction(TaskDetailAction.Complete)
-                            onBackClick(TaskDetailResult(state.value!!.id, true))
+                            onBackClick()
                         }) {
                             Icon(
                                 imageVector = Icons.Outlined.DoneOutline,
@@ -79,7 +79,7 @@ fun TaskDetailRoot(
                     },
                     navigationIcon = {
                         IconButton(
-                            onClick = { onBackClick(null) }
+                            onClick = { onBackClick() }
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Sharp.ArrowBack,
