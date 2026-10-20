@@ -199,21 +199,55 @@ class TaskCreationFlowTest {
         assertEquals(setOf(1), home.state.value.removingTaskIds)
     }
 
+    @Test
+    fun `removal notification is sent once after animation and undo preserves current edits`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val notifications = mutableListOf<Task>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            home.removals.collect { notifications.add(it) }
+        }
+        val original = Task(id = 1, title = "Original")
+        repository.tasks.value = listOf(original)
+        runCurrent()
+        repository.storedTasks[1] = original.copy(title = "Edited", isCompleted = true)
+        repository.tasks.value = emptyList()
+        runCurrent()
+        assertTrue(notifications.isEmpty())
+        home.onAction(HomeAction.RemovalFinished(setOf(1)))
+        runCurrent()
+        assertEquals(listOf(original), notifications)
+        home.onAction(HomeAction.RemovalFinished(setOf(1)))
+        runCurrent()
+        assertEquals(1, notifications.size)
+        home.onAction(HomeAction.UndoRemoval(notifications.single()))
+        runCurrent()
+        assertEquals(1, repository.updateCount)
+        assertEquals("Edited", repository.storedTasks[1]?.title)
+        assertEquals(false, repository.storedTasks[1]?.isCompleted)
+        assertEquals(1, (home.state.value.list as HomeListState.Content).tasks.single().id)
+    }
+
     private class FakeRepository : TaskRepository {
         val tasks = MutableStateFlow<List<Task>>(emptyList())
         var result = CompletableDeferred<Int>()
         var insertCount = 0
         var inserted: Task? = null
         var activeSubscriptions = 0
+        val storedTasks = mutableMapOf<Int, Task>()
+        var updateCount = 0
         override fun getAllTasks() = tasks
         override fun getAllActiveTasks() = tasks.onStart { activeSubscriptions++ }
-        override fun getTaskById(taskId: Int) = flowOf<Task?>(null)
+        override fun getTaskById(taskId: Int) = flowOf(storedTasks[taskId])
         override suspend fun insertTask(task: Task): Int {
             insertCount++
             inserted = task
             return result.await()
         }
-        override suspend fun updateTask(task: Task) = Unit
+        override suspend fun updateTask(task: Task) {
+            updateCount++
+            storedTasks[task.id] = task
+            tasks.value = storedTasks.values.filter { !it.isCompleted && !it.isDeleted }
+        }
         override suspend fun completeTask(task: Task, isCompleted: Boolean) = Unit
         override suspend fun deleteTaskSoftly(task: Task) = Unit
         override suspend fun clearTrash() = Unit

@@ -24,4 +24,6 @@
     <string name="switch_to_in_app_only">切换为仅应用内任务</string>
     <string name="switch_to_lock_notify">切换为锁屏常驻提醒</string>
     <string name="create_task_failed">创建失败，请重试</string>
+    <string name="undo">撤销</string>
+    <string name="task_removed">已移除“%1$s”</string>
 </resources>
