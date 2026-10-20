@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -65,6 +64,7 @@ fun HomeScreen(
     onAction: (HomeAction) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
+    val nowMillis = currentTaskTimeMillis()
     val tasks = (state.list as? HomeListState.Content)?.tasks.orEmpty()
     val taskId = state.pendingAnchorTaskId
     val targetIndex = tasks.indexOfFirst { it.id == taskId }
@@ -107,6 +107,7 @@ fun HomeScreen(
                     TaskItem(
                         task = task,
                         enabled = task.id !in removingIds,
+                        nowMillis = nowMillis,
                         onTaskClick = { onAction(HomeAction.TaskClick(it)) },
                     )
                 }
@@ -139,6 +140,7 @@ fun EmptyHomeScreen(modifier: Modifier = Modifier) {
 fun TaskItem(
     task: Task,
     enabled: Boolean = true,
+    nowMillis: Long = System.currentTimeMillis(),
     onTaskClick: (Task) -> Unit = {},
 ) {
     Row(
@@ -147,7 +149,11 @@ fun TaskItem(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         LockNotifyStatus(needLockNotify = task.needLockNotify)
-        Spacer(modifier = Modifier.padding(4.dp))
-        Text(text = task.title)
+        Text(
+            text = task.title,
+            modifier = Modifier.weight(1f).padding(vertical = 8.dp, horizontal = 4.dp),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        TaskCreatedTime(createdAt = task.createAt, nowMillis = nowMillis)
     }
 }
