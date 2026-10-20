@@ -73,17 +73,20 @@ class KeyboardInputSheetScope internal constructor(
 fun KeyboardInputSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    dismissEnabled: Boolean = true,
     title: String = stringResource(R.string.input_sheet_title),
     content: @Composable KeyboardInputSheetScope.() -> Unit,
 ) {
     Dialog(
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = { if (dismissEnabled) onDismissRequest() },
         properties = DialogProperties(
+            dismissOnBackPress = dismissEnabled,
+            dismissOnClickOutside = dismissEnabled,
             usePlatformDefaultWidth = false,
             decorFitsSystemWindows = false,
         ),
     ) {
-        InputSheetContent(onDismissRequest, modifier, title, content)
+        InputSheetContent(onDismissRequest, modifier, title, dismissEnabled, content)
     }
 }
 
@@ -93,6 +96,7 @@ private fun InputSheetContent(
     onDismissRequest: () -> Unit,
     modifier: Modifier,
     title: String,
+    dismissEnabled: Boolean,
     content: @Composable KeyboardInputSheetScope.() -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -111,9 +115,11 @@ private fun InputSheetContent(
     var inputPlaced by remember { mutableStateOf(false) }
 
     val dismiss = {
-        focusManager.clearFocus(force = true)
-        keyboardController?.hide()
-        currentOnDismiss()
+        if (dismissEnabled) {
+            focusManager.clearFocus(force = true)
+            keyboardController?.hide()
+            currentOnDismiss()
+        }
     }
     // 返回键关闭、点击外部关闭，以及调用方移除组件时，都需要释放焦点并收起软键盘。
     DisposableEffect(focusManager, keyboardController) {
@@ -158,7 +164,7 @@ private fun InputSheetContent(
         Box(
             Modifier.matchParentSize()
                 .semantics { contentDescription = dismissLabel }
-                .clickable(interactionSource = null, indication = null, onClick = dismiss)
+                .clickable(enabled = dismissEnabled, interactionSource = null, indication = null, onClick = dismiss)
         )
         Box(
             modifier = Modifier.fillMaxSize()
@@ -169,7 +175,7 @@ private fun InputSheetContent(
                 modifier = modifier.widthIn(max = 640.dp).fillMaxWidth()
                     .semantics {
                         paneTitle = title
-                        dismiss { dismiss(); true }
+                        dismiss { if (dismissEnabled) { dismiss(); true } else false }
                     }
                     .graphicsLayer {
                         // 在绘制阶段读取当前帧的软键盘占用高度，保持面板入场与键盘动画同步。

@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,8 +33,8 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onTaskClick: (Task) -> Unit = {},
+    homeViewModel: HomeViewModel = koinViewModel(),
 ) {
-    val homeViewModel: HomeViewModel = koinViewModel()
 
     val state by homeViewModel.state.collectAsStateWithLifecycle()
 
@@ -42,6 +44,7 @@ fun HomeScreen(
         onAction = { action ->
             when (action) {
                 is HomeAction.TaskClick -> onTaskClick(action.task)
+                else -> homeViewModel.onAction(action)
             }
         },
     )
@@ -53,20 +56,31 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onAction: (HomeAction) -> Unit = {},
 ) {
-    when (state) {
-        HomeState.Loading -> Box(
+    val listState = rememberLazyListState()
+    val tasks = (state.list as? HomeListState.Content)?.tasks.orEmpty()
+    val taskId = state.pendingAnchorTaskId
+    val targetIndex = tasks.indexOfFirst { it.id == taskId }
+    LaunchedEffect(taskId, targetIndex) {
+        if (taskId != null && targetIndex >= 0) {
+            listState.animateScrollToItem(targetIndex)
+            onAction(HomeAction.AnchorHandled(taskId))
+        }
+    }
+    when (val list = state.list) {
+        HomeListState.Loading -> Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
             CircularProgressIndicator()
         }
-        HomeState.Empty -> EmptyHomeScreen(modifier)
-        is HomeState.Content -> LazyColumn(
+        HomeListState.Empty -> EmptyHomeScreen(modifier)
+        is HomeListState.Content -> LazyColumn(
+            state = listState,
             modifier = modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(state.tasks, key = { task -> task.id }) { task ->
+            items(list.tasks, key = { task -> task.id }) { task ->
                 TaskItem(task = task, onTaskClick = { onAction(HomeAction.TaskClick(it)) })
             }
             item(key = "home_list_footer") {

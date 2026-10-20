@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import org.koin.androidx.compose.koinViewModel
 import com.josense.locktask.R
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.page.create.CreateTaskSheet
@@ -27,6 +28,7 @@ import com.josense.locktask.ui.page.create.CreateTaskSheet
 @Composable
 fun HomePageRoot(
     onTaskClick: (Task) -> Unit,
+    viewModel: HomeViewModel = koinViewModel(),
 ) {
 
     var showAddTaskSheet by remember { mutableStateOf(false) }
@@ -53,10 +55,14 @@ fun HomePageRoot(
             }
         }
     ) { innerPadding ->
-        HomeScreen(Modifier.padding(innerPadding), onTaskClick)
+        HomeScreen(Modifier.padding(innerPadding), onTaskClick, homeViewModel = viewModel)
         if (showAddTaskSheet) {
             CreateTaskSheet(
                 onDismiss = { showAddTaskSheet = false },
+                onCreated = { taskId ->
+                    viewModel.onAction(HomeAction.AnchorTask(taskId))
+                    showAddTaskSheet = false
+                },
             )
         }
     }

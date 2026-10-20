@@ -25,7 +25,7 @@ class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
         return taskDao.getTaskById(taskId).map { it?.toDomain() }
     }
 
-    override suspend fun insertTask(task: Task) = taskDao.insert(task.toEntity())
+    override suspend fun insertTask(task: Task) = taskDao.insert(task.toEntity()).toInt()
 
     override suspend fun updateTask(task: Task) = taskDao.update(task.toEntity())
 

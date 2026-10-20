@@ -14,7 +14,7 @@ interface TaskDao {
 
     /** 插入与更新 */
     @Insert
-    suspend fun insert(task: TaskEntity)
+    suspend fun insert(task: TaskEntity): Long
 
     @Update
     suspend fun updateTaskRaw(task: TaskEntity)
