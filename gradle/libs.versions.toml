@@ -15,9 +15,11 @@ room = "2.8.5"
 koin = "4.2.2"
 navigation = "2.10.2"
 json = "1.11.0"
+rive = "11.9.2"
 
 
 [libraries]
+rive-android = { module = "app.rive:rive-android", version.ref = "rive" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
