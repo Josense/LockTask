@@ -1,11 +1,7 @@
 package com.josense.locktask.ui.notification
 
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.res.stringResource
-import com.josense.locktask.R
 import com.josense.locktask.domain.notification.NotificationAccess
 import com.josense.locktask.ui.page.home.HomeAction
 import com.josense.locktask.ui.page.home.HomeListState
@@ -50,9 +46,10 @@ fun NotificationDelegate.AccessNotice(home: HomeState) {
                 it.needLockNotify && it.isCompleted.not() && it.isDeleted.not()
             }
     ) {
-        TextButton(onClick = { onAction(NotificationDelegate.Action.Enable) }) {
-            Text(stringResource(R.string.notification_access_action))
-        }
+        NotificationAccessCard(
+            access = state.access,
+            onEnable = { onAction(NotificationDelegate.Action.Enable) },
+        )
     }
 }
 
