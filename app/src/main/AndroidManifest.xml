@@ -14,6 +14,9 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.LockTask">
+        <receiver
+            android:name=".data.notification.TaskNotificationDismissReceiver"
+            android:exported="false" />
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"

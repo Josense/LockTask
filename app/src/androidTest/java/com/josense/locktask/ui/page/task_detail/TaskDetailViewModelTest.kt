@@ -171,6 +171,9 @@ class TaskDetailViewModelTest {
             if (fail) error("Save failed")
             this.task.value = task
         }
+        override suspend fun updateTaskText(taskId: Int, title: String, content: String) {
+            updateTask(task.value.copy(title = title, content = content, updateAt = Date()))
+        }
         override suspend fun completeTask(task: Task, isCompleted: Boolean) {
             updateTask(task.copy(isCompleted = isCompleted))
         }

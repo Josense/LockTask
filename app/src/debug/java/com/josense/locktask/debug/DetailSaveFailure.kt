@@ -28,6 +28,11 @@ internal class FailingDetailRepository(private val delegate: TaskRepository, pri
         delegate.updateTask(task)
     }
 
+    override suspend fun updateTaskText(taskId: Int, title: String, content: String) {
+        failure.check()
+        delegate.updateTaskText(taskId, title, content)
+    }
+
     override suspend fun completeTask(task: Task, isCompleted: Boolean) {
         failure.check()
         delegate.completeTask(task, isCompleted)

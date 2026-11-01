@@ -394,6 +394,8 @@ class TaskCreationFlowTest {
             storedTasks[task.id] = task
             tasks.value = storedTasks.values.filter { !it.isCompleted && !it.isDeleted }
         }
+        override suspend fun updateTaskText(taskId: Int, title: String, content: String): Unit = error("Unused")
+
         override suspend fun completeTask(task: Task, isCompleted: Boolean) =
             updateTask(task.copy(isCompleted = isCompleted))
         override suspend fun deleteTaskSoftly(task: Task) = updateTask(task.copy(isDeleted = true))

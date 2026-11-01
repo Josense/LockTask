@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.repository.TaskRepository
+import com.josense.locktask.domain.repository.TaskUnavailableException
 import com.josense.locktask.ui.navigation.TaskDetail
 import java.util.Date
 import kotlinx.coroutines.CancellationException
@@ -88,16 +89,13 @@ class TaskDetailViewModel(private val taskRepository: TaskRepository, savedState
         }
         launchSave {
             val current = taskRepository.getTaskById(taskDetailRoute.taskId).first()
-                ?: error("Task no longer exists")
-            check(current.isDeleted.not())
+                ?: throw TaskUnavailableException()
+            if (current.isDeleted) throw TaskUnavailableException()
             val changed = current.title != edit.title || current.content != edit.description
-            val saved = if (changed) {
-                current.copy(title = edit.title, content = edit.description, updateAt = Date())
-            } else {
-                current
+            if (changed) {
+                taskRepository.updateTaskText(current.id, edit.title, edit.description)
             }
-            if (changed) taskRepository.updateTask(saved)
-            mutableUiState.update { it.copy(task = saved, edit = null) }
+            mutableUiState.update { it.copy(edit = null) }
         }
     }
 

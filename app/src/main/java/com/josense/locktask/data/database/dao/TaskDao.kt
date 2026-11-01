@@ -24,6 +24,18 @@ interface TaskDao {
         updateTaskRaw(updatedTask)
     }
 
+    @Query(
+        "UPDATE task_table SET needLockNotify = 0, updateAt = :updatedAt " +
+            "WHERE id IN (:taskIds) AND needLockNotify = 1 AND isCompleted = 0 AND isDeleted = 0",
+    )
+    suspend fun disableDismissedTaskNotifications(taskIds: List<Int>, updatedAt: Date)
+
+    @Query(
+        "UPDATE task_table SET title = :title, content = :content, updateAt = :updatedAt " +
+            "WHERE id = :taskId AND isDeleted = 0",
+    )
+    suspend fun updateTaskText(taskId: Int, title: String, content: String, updatedAt: Date): Int
+
     /** 删除 */
 
     @Delete

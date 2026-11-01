@@ -144,6 +144,8 @@ class TaskNotificationSyncTest {
 
         override suspend fun updateTask(task: Task) = Unit
 
+        override suspend fun updateTaskText(taskId: Int, title: String, content: String): Unit = error("Unused")
+
         override suspend fun completeTask(task: Task, isCompleted: Boolean) = Unit
 
         override suspend fun deleteTaskSoftly(task: Task) = Unit

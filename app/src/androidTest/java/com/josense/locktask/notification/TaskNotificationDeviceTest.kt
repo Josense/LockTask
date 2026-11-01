@@ -7,9 +7,14 @@ import android.content.Context
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import com.josense.locktask.R
+import com.josense.locktask.data.database.dao.TaskDao
+import com.josense.locktask.data.model.toEntity
 import com.josense.locktask.data.notification.AndroidTaskNotificationGateway
+import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.notification.TaskNotification
+import com.josense.locktask.domain.repository.TaskRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
@@ -17,6 +22,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.koin.core.context.GlobalContext
 
 class TaskNotificationDeviceTest {
     @Test
@@ -80,6 +86,7 @@ class TaskNotificationDeviceTest {
                 )
                 assertTrue(it.notification.actions.isNullOrEmpty())
             }
+            assertNotEquals(posted[0].notification.deleteIntent, posted[1].notification.deleteIntent)
             assertNotEquals(
                 posted[0].notification.contentIntent,
                 posted[1].notification.contentIntent,
@@ -116,6 +123,60 @@ class TaskNotificationDeviceTest {
         } finally {
             gateway.cancel("device-test:a")
             gateway.cancel("device-test:b")
+        }
+    }
+
+    @Test
+    fun dismissedNotificationDisablesOnlyItsTaskAndDoesNotReturnOnReconcile() = runBlocking {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            instrumentation.uiAutomation.executeShellCommand(
+                "pm grant ${context.packageName} ${Manifest.permission.POST_NOTIFICATIONS}",
+            ).use { android.os.ParcelFileDescriptor.AutoCloseInputStream(it).readBytes() }
+        }
+        val koin = GlobalContext.get()
+        val repository = koin.get<TaskRepository>()
+        val dao = koin.get<TaskDao>()
+        val sync = koin.get<TaskNotificationSync>()
+        val manager = context.getSystemService(NotificationManager::class.java)
+        val gateway = AndroidTaskNotificationGateway(context)
+        val firstId = repository.insertTask(Task(title = "Dismiss test", content = "Keep description"))
+        val secondId = repository.insertTask(Task(title = "Keep notification"))
+        try {
+            sync.reconcile()
+            awaitCondition {
+                gateway.publishedKeys().containsAll(listOf("task:$firstId", "task:$secondId"))
+            }
+            val posted = manager.activeNotifications.single { it.tag == "locktask:task:$firstId" }
+            // App-initiated cancellation must not be interpreted as a user dismissal.
+            gateway.cancel("task:$firstId")
+            assertTrue(repository.getTaskById(firstId).first()!!.needLockNotify)
+            // Deliver the same PendingIntent Android sends when the user clears the notification.
+            posted.notification.deleteIntent.send()
+            awaitCondition { repository.getTaskById(firstId).first()?.needLockNotify == false }
+            val dismissed = repository.getTaskById(firstId).first()!!
+            assertEquals("Dismiss test", dismissed.title)
+            assertEquals("Keep description", dismissed.content)
+            assertFalse(dismissed.isCompleted)
+            assertFalse(dismissed.isDeleted)
+            assertTrue(repository.getTaskById(secondId).first()!!.needLockNotify)
+            assertTrue(repository.getAllActiveTasks().first().any { it.id == firstId })
+            sync.reconcile()
+            awaitCondition { "task:$firstId" !in gateway.publishedKeys() }
+            assertTrue("task:$secondId" in gateway.publishedKeys())
+            // Duplicate deliveries must be harmless and not keep changing the task timestamp.
+            val updatedAt = dismissed.updateAt
+            posted.notification.deleteIntent.send()
+            delay(200)
+            assertEquals(updatedAt, repository.getTaskById(firstId).first()!!.updateAt)
+            repository.updateTask(dismissed.copy(needLockNotify = true))
+            awaitCondition { "task:$firstId" in gateway.publishedKeys() }
+        } finally {
+            listOf(firstId, secondId).forEach { id ->
+                repository.getTaskById(id).first()?.let { dao.deletePhysically(it.toEntity()) }
+                gateway.cancel("task:$id")
+            }
         }
     }
 

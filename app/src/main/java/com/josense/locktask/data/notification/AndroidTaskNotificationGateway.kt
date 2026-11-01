@@ -28,6 +28,8 @@ class AndroidTaskNotificationGateway(private val context: Context) : TaskNotific
         const val TAG_PREFIX = "locktask:"
         const val NOTIFICATION_ID = 1
         const val CONTENT_REQUEST_CODE = 0
+
+        const val DISMISS_REQUEST_CODE = 0
     }
 
     private fun createChannel() {
@@ -120,6 +122,20 @@ class AndroidTaskNotificationGateway(private val context: Context) : TaskNotific
                 PendingIntent.FLAG_UPDATE_CURRENT or
                     PendingIntent.FLAG_IMMUTABLE,
             )
+        val dismissIntent = Intent(context, TaskNotificationDismissReceiver::class.java).apply {
+            action = TaskNotificationDismissReceiver.ACTION_DISMISSED
+            data = Uri.Builder()
+                .scheme(context.getString(R.string.notification_dismiss_uri_scheme))
+                .authority(context.getString(R.string.notification_dismiss_uri_host))
+                .appendPath(notification.key).build()
+            putExtra(TaskNotificationDismissReceiver.EXTRA_TASK_IDS, notification.taskIds.toIntArray())
+        }
+        val dismissPendingIntent = PendingIntent.getBroadcast(
+            context,
+            DISMISS_REQUEST_CODE,
+            dismissIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
         val built =
             NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.mipmap.ic_launcher_monochrome)
@@ -134,6 +150,7 @@ class AndroidTaskNotificationGateway(private val context: Context) : TaskNotific
                     contentView(notification, expanded = true),
                 )
                 .setContentIntent(pendingIntent)
+                .setDeleteIntent(dismissPendingIntent)
                 .setOngoing(true)
                 .setAutoCancel(false)
                 .setOnlyAlertOnce(true)

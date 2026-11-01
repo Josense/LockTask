@@ -48,4 +48,6 @@
     <string name="task_detail_save">保存</string>
     <string name="task_detail_saving">正在保存…</string>
     <string name="task_title_required">标题不能为空</string>
+    <string name="notification_dismiss_uri_scheme" translatable="false">locktask-dismiss</string>
+    <string name="notification_dismiss_uri_host" translatable="false">notification</string>
 </resources>
