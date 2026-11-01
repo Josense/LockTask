@@ -73,6 +73,15 @@ class AndroidTaskNotificationGateway(private val context: Context) : TaskNotific
         }
     }
 
+    override suspend fun setRetentionEnabled(enabled: Boolean) {
+        val intent = Intent(context, TaskReminderService::class.java)
+        if (enabled) {
+            ContextCompat.startForegroundService(context, intent)
+        } else {
+            context.stopService(intent)
+        }
+    }
+
     override suspend fun publishedKeys(): Set<String> = manager.activeNotifications
         .filter {
             it.id == NOTIFICATION_ID &&

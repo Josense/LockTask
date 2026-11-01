@@ -38,15 +38,25 @@ fun NotificationDelegate.HomeEffect(home: HomeState, dispatch: (HomeAction) -> U
 @Composable
 fun NotificationDelegate.AccessNotice(home: HomeState) {
     val tasks = (home.list as? HomeListState.Content)?.tasks.orEmpty()
-    if (
-        state.access != NotificationAccess.Available &&
-        tasks.any {
-            it.needLockNotify && it.isCompleted.not() && it.isDeleted.not()
-        }
-    ) {
+    val hasReminders = tasks.any {
+        it.needLockNotify && it.isCompleted.not() && it.isDeleted.not()
+    }
+    if (hasReminders && state.access != NotificationAccess.Available) {
         NotificationAccessCard(
             access = state.access,
             onEnable = { onAction(NotificationDelegate.Action.Enable) },
+        )
+    } else if (hasReminders) {
+        BackgroundReminderNotice(
+            dismissed = state.backgroundNoticeDismissed,
+            onShowGuide = { onAction(NotificationDelegate.Action.ShowBackgroundGuide) },
+            onDismiss = { onAction(NotificationDelegate.Action.DismissBackgroundNotice) },
+        )
+    }
+    if (state.backgroundGuideVisible) {
+        BackgroundReminderGuide(
+            onOpenSettings = { onAction(NotificationDelegate.Action.OpenBackgroundSettings) },
+            onClose = { onAction(NotificationDelegate.Action.HideBackgroundGuide) },
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.josense.locktask.ui.notification
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -34,6 +35,8 @@ class NotificationDelegate(
     internal data class State(
         val target: Target? = null,
         val access: NotificationAccess = NotificationAccess.Available,
+        val backgroundGuideVisible: Boolean = false,
+        val backgroundNoticeDismissed: Boolean = false,
     )
 
     internal sealed interface Action {
@@ -41,12 +44,24 @@ class NotificationDelegate(
 
         data object Enable : Action
 
+        data object ShowBackgroundGuide : Action
+
+        data object HideBackgroundGuide : Action
+
+        data object DismissBackgroundNotice : Action
+
+        data object OpenBackgroundSettings : Action
+
         data class Created(val taskId: Int) : Action
 
         data class Consume(val requestId: Long) : Action
     }
 
-    internal var state by mutableStateOf(State())
+    private val preferences = activity.getPreferences(Context.MODE_PRIVATE)
+
+    internal var state by mutableStateOf(
+        State(backgroundNoticeDismissed = preferences.getBoolean(BACKGROUND_NOTICE_DISMISSED_KEY, false)),
+    )
         private set
 
     private val permission =
@@ -107,6 +122,13 @@ class NotificationDelegate(
                 }
             }
             Action.Enable -> enable(automatic = false)
+            Action.ShowBackgroundGuide -> state = state.copy(backgroundGuideVisible = true)
+            Action.HideBackgroundGuide -> state = state.copy(backgroundGuideVisible = false)
+            Action.DismissBackgroundNotice -> {
+                preferences.edit { putBoolean(BACKGROUND_NOTICE_DISMISSED_KEY, true) }
+                state = state.copy(backgroundNoticeDismissed = true)
+            }
+            Action.OpenBackgroundSettings -> openBackgroundSettings()
             is Action.Created -> {
                 activity.lifecycleScope.launch {
                     if (
@@ -126,11 +148,23 @@ class NotificationDelegate(
         }
     }
 
+    private fun openBackgroundSettings() {
+        // OEM manual-management authorization has no portable read API. Never mark it granted here.
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            "package:${activity.packageName}".toUri(),
+        )
+        try {
+            activity.startActivity(intent)
+        } catch (_: ActivityNotFoundException) {
+            activity.startActivity(Intent(Settings.ACTION_SETTINGS))
+        }
+    }
+
     private fun enable(automatic: Boolean) {
         activity.lifecycleScope.launch {
             val access = gateway.access()
             state = state.copy(access = access)
-            val preferences = activity.getPreferences(Context.MODE_PRIVATE)
             if (
                 access == NotificationAccess.PermissionRequired &&
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
@@ -179,6 +213,7 @@ class NotificationDelegate(
     }
 
     private companion object {
+        const val BACKGROUND_NOTICE_DISMISSED_KEY = "background_notice_dismissed"
         const val SAVED_STATE = "task_notification_delegate"
         const val TARGET_TASK_KEY = "task"
         const val PERMISSION_ASKED_KEY = "notification_permission_asked"

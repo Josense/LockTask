@@ -79,7 +79,10 @@ class TaskNotificationSync(
                 next.remove(key)
             }
         }
-        if (gateway.access() == NotificationAccess.Available) {
+        val hasAccess = gateway.access() == NotificationAccess.Available
+        // Background start restrictions must not prevent ordinary task notifications from publishing.
+        attempt { gateway.setRetentionEnabled(hasAccess && desired.isNotEmpty()) }
+        if (hasAccess) {
             for ((key, spec) in desired) {
                 if (applied[key] != spec || (full && key !in published)) {
                     attempt {

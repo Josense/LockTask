@@ -112,12 +112,68 @@ class TaskNotificationSyncTest {
         assertTrue(gateway.notifications.isEmpty())
     }
 
+    @Test
+    fun `retention follows enabled reminders and notification access`() = runTest {
+        val repo = Repository()
+        val gateway = Gateway()
+        val sync = TaskNotificationSync(repo, gateway, backgroundScope)
+        sync.start()
+        runCurrent()
+        assertFalse(gateway.retentionEnabled)
+        repo.tasks.value = listOf(Task(1, "A"), Task(2, "B"))
+        runCurrent()
+        assertTrue(gateway.retentionEnabled)
+        repo.tasks.value = listOf(Task(1, "A", needLockNotify = false), Task(2, "B"))
+        runCurrent()
+        assertTrue(gateway.retentionEnabled)
+        repo.tasks.value = listOf(Task(1, "A", isCompleted = true), Task(2, "B", isDeleted = true))
+        runCurrent()
+        assertFalse(gateway.retentionEnabled)
+        repo.tasks.value = listOf(Task(1, "A"))
+        runCurrent()
+        assertTrue(gateway.retentionEnabled)
+        gateway.status = NotificationAccess.AppDisabled
+        sync.reconcile()
+        runCurrent()
+        assertFalse(gateway.retentionEnabled)
+        gateway.status = NotificationAccess.Available
+        sync.reconcile()
+        runCurrent()
+        assertTrue(gateway.retentionEnabled)
+        repo.tasks.value = emptyList()
+        runCurrent()
+        assertFalse(gateway.retentionEnabled)
+    }
+
+    @Test
+    fun `denied service start does not block notifications and retries on reconciliation`() = runTest {
+        val repo = Repository()
+        val gateway = Gateway().apply { failRetention = true }
+        val sync = TaskNotificationSync(repo, gateway, backgroundScope)
+        repo.tasks.value = listOf(Task(1, "A"))
+        sync.start()
+        runCurrent()
+        assertEquals(setOf("task:1"), gateway.notifications.keys)
+        assertFalse(gateway.retentionEnabled)
+        gateway.failRetention = false
+        sync.reconcile()
+        runCurrent()
+        assertTrue(gateway.retentionEnabled)
+    }
+
     private class Gateway : TaskNotificationGateway {
         var status = NotificationAccess.Available
         var failKey: String? = null
+        var retentionEnabled = false
+        var failRetention = false
         val notifications = mutableMapOf<String, TaskNotification>()
 
         override suspend fun access() = status
+
+        override suspend fun setRetentionEnabled(enabled: Boolean) {
+            if (failRetention) error("Test foreground service start denied")
+            retentionEnabled = enabled
+        }
 
         override suspend fun publishedKeys() = notifications.keys.toSet()
 
