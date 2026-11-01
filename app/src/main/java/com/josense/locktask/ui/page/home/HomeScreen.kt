@@ -116,7 +116,11 @@ fun HomeScreen(
         is HomeListState.Content -> LazyColumn(
             state = listState,
             modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 88.dp,
+            ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(list.tasks, key = { task -> task.id }) { task ->
@@ -130,14 +134,11 @@ fun HomeScreen(
                     )
                 }
             }
-            item(key = "home_list_footer") {
-                Text(
-                    text = stringResource(R.string.home_list_end),
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 88.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
+            val taskCount = list.tasks.count { it.id !in removingIds }
+            if (taskCount > 0) {
+                item(key = "home_list_footer") {
+                    TaskListFooter(taskCount = taskCount)
+                }
             }
         }
     }
