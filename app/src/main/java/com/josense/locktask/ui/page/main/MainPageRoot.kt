@@ -1,0 +1,72 @@
+package com.josense.locktask.ui.page.main
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.josense.locktask.domain.model.Task
+import com.josense.locktask.ui.notification.NotificationDelegate
+import com.josense.locktask.ui.page.home.HomePageRoot
+import com.josense.locktask.ui.page.settings.SettingsPageRoot
+import com.josense.locktask.ui.page.templates.TemplatesPageRoot
+
+@Composable
+fun MainPageRoot(notifications: NotificationDelegate, onTaskClick: (Task) -> Unit) {
+    var selectedTab by rememberSaveable { mutableStateOf(MainTab.Tasks) }
+    val tabStates = rememberSaveableStateHolder()
+    LaunchedEffect(notifications.state.target?.requestId) {
+        if (notifications.state.target != null) selectedTab = MainTab.Tasks
+    }
+    BackHandler(enabled = selectedTab != MainTab.Tasks) { selectedTab = MainTab.Tasks }
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            NavigationBar {
+                MainTab.entries.forEach { tab ->
+                    NavigationBarItem(
+                        modifier = Modifier.testTag("main_tab_${tab.name}"),
+                        selected = selectedTab == tab,
+                        onClick = { selectedTab = tab },
+                        icon = { Icon(tab.icon, contentDescription = null) },
+                        label = { Text(stringResource(tab.label)) },
+                    )
+                }
+            }
+        },
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
+            tabStates.SaveableStateProvider(selectedTab) {
+                when (selectedTab) {
+                    MainTab.Tasks -> HomePageRoot(onTaskClick = onTaskClick, notifications = notifications)
+                    MainTab.Templates -> TemplatesPageRoot()
+                    MainTab.Settings -> SettingsPageRoot(
+                        notificationAccess = notifications.state.access,
+                        onNotificationSettings = {
+                            notifications.onAction(NotificationDelegate.Action.OpenNotificationSettings)
+                        },
+                        onBackgroundSettings = {
+                            notifications.onAction(NotificationDelegate.Action.ShowBackgroundGuide)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}

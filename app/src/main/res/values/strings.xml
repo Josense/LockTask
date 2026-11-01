@@ -59,4 +59,12 @@
     <string name="background_reminder_dismiss">不再提醒</string>
     <string name="background_reminder_guide">在应用信息中打开“耗电和后台”或“电池”，将后台管理改为“手动管理”，并开启“允许后台运行”。部分系统将此选项称为“不受限制”。\n\n不同手机的名称可能不同。仅忽略电池优化不一定能阻止系统清理；设置后可划掉应用，确认任务通知是否保留。\n\n应用无法可靠读取这项系统授权，请以系统设置和实际效果为准。</string>
     <string name="background_reminder_close">知道了</string>
+    <string name="tab_tasks">任务</string>
+    <string name="tab_templates">模板</string>
+    <string name="tab_settings">设置</string>
+    <string name="templates_empty_title">暂无任务模板</string>
+    <string name="templates_empty_description">模板功能即将开放，常用任务将在这里快速创建。</string>
+    <string name="settings_notifications">通知设置</string>
+    <string name="settings_notifications_enabled">任务通知已开启</string>
+    <string name="settings_background_description">查看后台运行授权说明，减少任务通知被系统清理</string>
 </resources>

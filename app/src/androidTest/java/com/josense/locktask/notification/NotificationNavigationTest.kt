@@ -3,7 +3,9 @@ package com.josense.locktask.notification
 import android.Manifest
 import android.app.NotificationManager
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
@@ -83,12 +85,17 @@ class NotificationNavigationTest {
             }
             compose.waitForIdle()
             compose.onNodeWithText("$prefix-0").assertIsDisplayed()
-            // A second click has an independent request and must still work.
+            compose.onNodeWithTag("main_tab_Templates").performClick()
+            compose.onNodeWithTag("main_tab_Tasks").performClick()
+            compose.onNodeWithText("$prefix-0").assertIsDisplayed()
+            compose.onNodeWithTag("main_tab_Settings").performClick()
+            // A notification from another tab must restore the task list before anchoring its row.
             compose.runOnUiThread {
                 firstNotification.notification.contentIntent.send()
             }
             compose.waitForIdle()
             compose.onNodeWithText("$prefix-29").assertIsDisplayed()
+            compose.onNodeWithTag("main_tab_Tasks").assertIsSelected()
             // Recreation must register fresh callbacks without replaying a
             // consumed target.
             compose.activityRule.scenario.recreate()

@@ -50,6 +50,8 @@ class NotificationDelegate(
 
         data object DismissBackgroundNotice : Action
 
+        data object OpenNotificationSettings : Action
+
         data object OpenBackgroundSettings : Action
 
         data class Created(val taskId: Int) : Action
@@ -129,6 +131,7 @@ class NotificationDelegate(
                 state = state.copy(backgroundNoticeDismissed = true)
             }
             Action.OpenBackgroundSettings -> openBackgroundSettings()
+            Action.OpenNotificationSettings -> openNotificationSettings(state.access)
             is Action.Created -> {
                 activity.lifecycleScope.launch {
                     if (
@@ -187,29 +190,33 @@ class NotificationDelegate(
             if (automatic || access == NotificationAccess.Available) {
                 return@launch
             }
-            val channelId = activity.getString(R.string.notification_channel_id)
-            val settings =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Intent(
-                        if (access == NotificationAccess.ChannelDisabled) {
-                            Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
-                        } else {
-                            Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                        },
-                    )
-                        .putExtra(
-                            Settings.EXTRA_APP_PACKAGE,
-                            activity.packageName,
-                        )
-                        .putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
-                } else {
-                    Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        "package:${activity.packageName}".toUri(),
-                    )
-                }
-            activity.startActivity(settings)
+            openNotificationSettings(access)
         }
+    }
+
+    private fun openNotificationSettings(access: NotificationAccess) {
+        val channelId = activity.getString(R.string.notification_channel_id)
+        val settings =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Intent(
+                    if (access == NotificationAccess.ChannelDisabled) {
+                        Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
+                    } else {
+                        Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                    },
+                )
+                    .putExtra(
+                        Settings.EXTRA_APP_PACKAGE,
+                        activity.packageName,
+                    )
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
+            } else {
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    "package:${activity.packageName}".toUri(),
+                )
+            }
+        activity.startActivity(settings)
     }
 
     private companion object {

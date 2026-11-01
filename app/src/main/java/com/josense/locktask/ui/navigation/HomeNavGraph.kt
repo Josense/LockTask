@@ -4,9 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.josense.locktask.ui.notification.BackgroundGuide
 import com.josense.locktask.ui.notification.NavigationEffect
 import com.josense.locktask.ui.notification.NotificationDelegate
-import com.josense.locktask.ui.page.home.HomePageRoot
+import com.josense.locktask.ui.page.main.MainPageRoot
 import com.josense.locktask.ui.page.task_detail.TaskDetailRoot
 
 @Composable
@@ -15,6 +16,7 @@ fun HomeNavGraph(notifications: NotificationDelegate) {
     notifications.NavigationEffect {
         navController.popBackStack<Home>(inclusive = false)
     }
+    notifications.BackgroundGuide()
     NavHost(
         navController = navController,
         startDestination = Home,
@@ -25,7 +27,7 @@ fun HomeNavGraph(notifications: NotificationDelegate) {
         predictivePopExitTransition = { AppNavTransitions.DefaultExit },
     ) {
         composable<Home> {
-            HomePageRoot(
+            MainPageRoot(
                 onTaskClick = { task ->
                     navController.navigate(TaskDetail(task.id))
                 },

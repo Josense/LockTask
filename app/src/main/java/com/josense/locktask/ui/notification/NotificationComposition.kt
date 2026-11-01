@@ -53,6 +53,10 @@ fun NotificationDelegate.AccessNotice(home: HomeState) {
             onDismiss = { onAction(NotificationDelegate.Action.DismissBackgroundNotice) },
         )
     }
+}
+
+@Composable
+fun NotificationDelegate.BackgroundGuide() {
     if (state.backgroundGuideVisible) {
         BackgroundReminderGuide(
             onOpenSettings = { onAction(NotificationDelegate.Action.OpenBackgroundSettings) },
