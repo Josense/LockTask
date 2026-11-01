@@ -4,6 +4,8 @@ import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.notification.*
 import com.josense.locktask.domain.repository.TaskRepository
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.logging.Level
+import java.util.logging.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -14,7 +16,7 @@ import kotlinx.coroutines.launch
 class TaskNotificationSync(
     private val repository: TaskRepository,
     private val gateway: TaskNotificationGateway,
-    private val reportFailure: (Exception) -> Unit = {},
+    private val scope: CoroutineScope,
 ) {
     private val requests = Channel<Unit>(Channel.CONFLATED)
     private var job: Job? = null
@@ -22,7 +24,7 @@ class TaskNotificationSync(
     private var initialized = false
     private val forceReconcile = AtomicBoolean(true)
 
-    fun start(scope: CoroutineScope) {
+    fun start() {
         if (job != null) return
         job =
             scope.launch {
@@ -37,8 +39,7 @@ class TaskNotificationSync(
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (error: Exception) {
-                        forceReconcile.set(true)
-                        reportFailure(error)
+                        handleFailure(error)
                     }
                 }
             }
@@ -96,8 +97,21 @@ class TaskNotificationSync(
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Exception) {
-            forceReconcile.set(true)
-            reportFailure(error)
+            handleFailure(error)
         }
+    }
+
+    private fun handleFailure(error: Exception) {
+        forceReconcile.set(true)
+        logger.log(
+            Level.WARNING,
+            "Notification synchronization failed",
+            error,
+        )
+    }
+
+    private companion object {
+        val logger: Logger =
+            Logger.getLogger(TaskNotificationSync::class.java.name)
     }
 }

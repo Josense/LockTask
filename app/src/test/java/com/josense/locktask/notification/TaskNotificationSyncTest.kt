@@ -17,7 +17,7 @@ class TaskNotificationSyncTest {
     fun `publish update and remove follow task intent`() = runTest {
         val repo = Repository()
         val gateway = Gateway()
-        TaskNotificationSync(repo, gateway).start(backgroundScope)
+        TaskNotificationSync(repo, gateway, backgroundScope).start()
         repo.tasks.value =
             listOf(
                 Task(1, "First"),
@@ -38,9 +38,9 @@ class TaskNotificationSyncTest {
         runTest {
             val repo = Repository()
             val gateway = Gateway()
-            val sync = TaskNotificationSync(repo, gateway)
+            val sync = TaskNotificationSync(repo, gateway, backgroundScope)
             repo.tasks.value = listOf(Task(1, "A"), Task(2, "B"))
-            sync.start(backgroundScope)
+            sync.start()
             runCurrent()
             gateway.notifications.remove("task:1")
             repo.tasks.value = listOf(Task(1, "A"), Task(2, "Edited B"))
@@ -60,8 +60,8 @@ class TaskNotificationSyncTest {
             gateway.notifications["stale"] =
                 TaskNotification("stale", listOf(99), "Stale", "")
             repo.tasks.value = listOf(Task(1, "Saved"))
-            val sync = TaskNotificationSync(repo, gateway)
-            sync.start(backgroundScope)
+            val sync = TaskNotificationSync(repo, gateway, backgroundScope)
+            sync.start()
             runCurrent()
             assertTrue(gateway.notifications.isEmpty())
             assertEquals(1, repo.tasks.value.size)
@@ -78,12 +78,10 @@ class TaskNotificationSyncTest {
             val gateway = Gateway()
             gateway.failKey = "task:1"
             repo.tasks.value = listOf(Task(1, "A"), Task(2, "B"))
-            val errors = mutableListOf<Exception>()
-            val sync = TaskNotificationSync(repo, gateway, errors::add)
-            sync.start(backgroundScope)
+            val sync = TaskNotificationSync(repo, gateway, backgroundScope)
+            sync.start()
             runCurrent()
             assertEquals(setOf("task:2"), gateway.notifications.keys)
-            assertEquals(1, errors.size)
             gateway.failKey = null
             sync.reconcile()
             runCurrent()
@@ -104,8 +102,8 @@ class TaskNotificationSyncTest {
             val gateway = Gateway()
             gateway.notifications["task:1"] =
                 TaskNotification("task:1", listOf(1), "A", "")
-            val sync = TaskNotificationSync(repo, gateway)
-            sync.start(backgroundScope)
+            val sync = TaskNotificationSync(repo, gateway, backgroundScope)
+            sync.start()
             sync.reconcile()
             runCurrent()
             assertTrue(gateway.notifications.containsKey("task:1"))

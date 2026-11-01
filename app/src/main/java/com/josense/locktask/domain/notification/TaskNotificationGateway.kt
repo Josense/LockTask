@@ -9,10 +9,3 @@ interface TaskNotificationGateway {
 
     suspend fun cancel(key: String)
 }
-
-enum class NotificationAccess {
-    Available,
-    PermissionRequired,
-    AppDisabled,
-    ChannelDisabled,
-}

@@ -1,6 +1,5 @@
 package com.josense.locktask.di
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.room.Room
 import com.josense.locktask.data.database.TaskDatabase
@@ -13,13 +12,23 @@ import com.josense.locktask.ui.notification.NotificationDelegate
 import com.josense.locktask.ui.page.create.CreateTaskViewModel
 import com.josense.locktask.ui.page.home.HomeViewModel
 import com.josense.locktask.ui.page.task_detail.TaskDetailViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import org.koin.core.qualifier.named
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
+private val applicationScope = named("applicationScope")
+
 val appModule = module {
+    single<CoroutineScope>(applicationScope) {
+        CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    }
+
     factory { (activity: ComponentActivity) ->
         NotificationDelegate(
             activity,
@@ -32,15 +41,7 @@ val appModule = module {
     single<TaskNotificationGateway> {
         AndroidTaskNotificationGateway(androidContext())
     }
-    single {
-        TaskNotificationSync(get(), get()) {
-            Log.w(
-                "TaskNotificationSync",
-                "Notification synchronization failed",
-                it,
-            )
-        }
-    }
+    single { TaskNotificationSync(get(), get(), get(applicationScope)) }
 
     // 任务数据库
     single {
