@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(private val taskRepository: TaskRepository) : ViewModel() {
+    private var nextOperationId = 0L
+    private val failedActions = Channel<Unit>(Channel.CONFLATED)
+    val failures = failedActions.receiveAsFlow()
     private val removedTasks = Channel<Task>(Channel.CONFLATED)
     val removals = removedTasks.receiveAsFlow()
     private val mutableState = MutableStateFlow(HomeState())
@@ -26,7 +29,24 @@ class HomeViewModel(private val taskRepository: TaskRepository) : ViewModel() {
         coroutineScope {
             launch {
                 taskRepository.getAllActiveTasks().collect { tasks ->
-                    mutableState.update { it.withTasks(tasks) }
+                    val current = mutableState.value
+                    val activeIds = tasks.mapTo(mutableSetOf()) { it.id }
+                    val previous = (current.list as? HomeListState.Content)?.tasks.orEmpty()
+                    val removals = previous
+                        .filter { it.id !in activeIds && current.operations[it.id] !is TaskOperation.Removing }
+                        .associate { previousTask ->
+                            val pending = current.operations[previousTask.id] as? TaskOperation.Saving
+                            val kind = pending?.kind ?: run {
+                                val stored = taskRepository.getTaskById(previousTask.id).first()
+                                if (stored?.isCompleted == true && stored.isDeleted.not()) {
+                                    TaskRemovalKind.Complete
+                                } else {
+                                    TaskRemovalKind.Delete
+                                }
+                            }
+                            previousTask.id to TaskOperation.Removing(pending?.id ?: ++nextOperationId, kind)
+                        }
+                    mutableState.update { it.withTasks(tasks, removals) }
                 }
             }
             emitAll(mutableState)
@@ -35,28 +55,57 @@ class HomeViewModel(private val taskRepository: TaskRepository) : ViewModel() {
 
     fun onAction(action: HomeAction) {
         when (action) {
+            is HomeAction.CompleteTask -> removeTask(action.taskId, TaskRemovalKind.Complete)
+            is HomeAction.DeleteTask -> removeTask(action.taskId, TaskRemovalKind.Delete)
             is HomeAction.AnchorTask -> mutableState.update { it.copy(pendingAnchorTaskId = action.taskId) }
             is HomeAction.AnchorHandled -> mutableState.update {
                 if (it.pendingAnchorTaskId == action.taskId) it.copy(pendingAnchorTaskId = null) else it
             }
             is HomeAction.RemovalFinished -> {
                 val current = mutableState.value
-                val removed = (current.list as? HomeListState.Content)?.tasks?.lastOrNull {
-                    it.id in action.taskIds && it.id in current.removingTaskIds
+                val next = current.finishRemoval(action.taskId, action.operationId)
+                if (next != current) {
+                    val removed = (current.list as? HomeListState.Content)?.tasks?.find { it.id == action.taskId }
+                    mutableState.value = next
+                    if (removed != null) removedTasks.trySend(removed)
                 }
-                mutableState.update { current ->
-                    val removedIds = action.taskIds intersect current.removingTaskIds
-                    val displayed = (current.list as? HomeListState.Content)?.tasks.orEmpty()
-                    val tasks = displayed.filterNot { it.id in removedIds }
-                    current.copy(
-                        list = if (tasks.isEmpty()) HomeListState.Empty else HomeListState.Content(tasks),
-                        removingTaskIds = current.removingTaskIds - removedIds,
-                    )
-                }
-                if (removed != null) removedTasks.trySend(removed)
             }
             is HomeAction.UndoRemoval -> undoRemoval(action.task)
             is HomeAction.TaskClick -> Unit
+        }
+    }
+
+    private fun removeTask(taskId: Int, kind: TaskRemovalKind) {
+        val current = mutableState.value
+        val existing = current.operations[taskId]
+        if (existing is TaskOperation.Saving || existing is TaskOperation.Removing) return
+        if ((current.list as? HomeListState.Content)?.tasks?.none { it.id == taskId } != false) return
+        val operation = TaskOperation.Saving(++nextOperationId, kind)
+        mutableState.update { it.copy(operations = it.operations + (taskId to operation)) }
+        viewModelScope.launch {
+            try {
+                val task = taskRepository.getTaskById(taskId).first()
+                    ?: error("Task no longer exists")
+                if (task.isCompleted.not() && task.isDeleted.not()) {
+                    when (kind) {
+                        TaskRemovalKind.Complete -> taskRepository.completeTask(task)
+                        TaskRemovalKind.Delete -> taskRepository.deleteTaskSoftly(task)
+                    }
+                }
+                // Keep Saving until the repository confirms removal from the active list.
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                mutableState.update {
+                    if (it.operations[taskId] == operation) {
+                        it.copy(operations = it.operations + (taskId to TaskOperation.Failed(operation.id, kind)))
+                    } else {
+                        it
+                    }
+                }
+                Log.w("HomeViewModel", "Unable to remove task", error)
+                failedActions.trySend(Unit)
+            }
         }
     }
 

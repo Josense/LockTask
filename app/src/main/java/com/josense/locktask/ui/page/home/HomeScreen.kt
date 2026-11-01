@@ -20,9 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +42,7 @@ import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.components.LockNotifyStatus
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import org.koin.androidx.compose.koinViewModel
 
 private const val TASK_HIGHLIGHT_DURATION_MILLIS = 1_500L
@@ -73,15 +76,20 @@ fun HomeScreen(state: HomeState, modifier: Modifier = Modifier, onAction: (HomeA
     val targetIndex = tasks.indexOfFirst { it.id == taskId }
     val removingIds = state.removingTaskIds
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    var exiting by remember(removingIds) { mutableStateOf(false) }
-    LaunchedEffect(removingIds, lifecycle) {
-        if (removingIds.isNotEmpty()) {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                exiting = false
-                delay(TaskRemovalTiming.HOLD_MILLIS.milliseconds)
-                exiting = true
-                delay(TaskRemovalTiming.REMOVAL_ACK_DELAY_MILLIS.milliseconds)
-                onAction(HomeAction.RemovalFinished(removingIds))
+    // LazyColumn does not compose off-screen rows, so acknowledge those without waiting for an animation.
+    state.operations.forEach { (id, operation) ->
+        if (operation is TaskOperation.Removing) {
+            key(id, operation.id) {
+                LaunchedEffect(lifecycle) {
+                    lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                        delay(TaskRemovalTiming.HOLD_MILLIS.milliseconds)
+                        snapshotFlow {
+                            val layout = listState.layoutInfo
+                            layout.totalItemsCount > 0 && layout.visibleItemsInfo.none { it.key == id }
+                        }.first { it }
+                        onAction(HomeAction.RemovalFinished(id, operation.id))
+                    }
+                }
             }
         }
     }
@@ -118,15 +126,13 @@ fun HomeScreen(state: HomeState, modifier: Modifier = Modifier, onAction: (HomeA
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(list.tasks, key = { task -> task.id }) { task ->
-                RemovingTaskItem(visible = !(exiting && task.id in removingIds)) {
-                    TaskItem(
-                        task = task,
-                        highlighted = task.id == highlightedId,
-                        enabled = task.id !in removingIds,
-                        nowMillis = nowMillis,
-                        onTaskClick = { onAction(HomeAction.TaskClick(it)) },
-                    )
-                }
+                HomeTaskRow(
+                    task = task,
+                    operation = state.operations[task.id],
+                    highlighted = task.id == highlightedId,
+                    nowMillis = nowMillis,
+                    onAction = onAction,
+                )
             }
             val taskCount = list.tasks.count { it.id !in removingIds }
             if (taskCount > 0) {

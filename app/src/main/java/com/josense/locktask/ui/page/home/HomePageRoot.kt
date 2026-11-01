@@ -50,6 +50,12 @@ fun HomePageRoot(
     val snackbarHostState = remember { SnackbarHostState() }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val removedMessage = stringResource(R.string.task_removed)
+    val failureMessage = stringResource(R.string.task_action_failed)
+    LaunchedEffect(viewModel, lifecycle, failureMessage) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.failures.collect { snackbarHostState.showSnackbar(failureMessage) }
+        }
+    }
     val actionLabel = stringResource(R.string.undo)
     LaunchedEffect(viewModel, lifecycle) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {

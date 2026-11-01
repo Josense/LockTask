@@ -10,6 +10,8 @@ import com.josense.locktask.ui.page.create.Submission
 import com.josense.locktask.ui.page.home.HomeAction
 import com.josense.locktask.ui.page.home.HomeListState
 import com.josense.locktask.ui.page.home.HomeViewModel
+import com.josense.locktask.ui.page.home.TaskOperation
+import com.josense.locktask.ui.page.home.TaskRemovalDirection
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -147,7 +149,7 @@ class TaskCreationFlowTest {
         runCurrent()
         assertEquals(tasks, (home.state.value.list as HomeListState.Content).tasks)
         assertEquals(setOf(2), home.state.value.removingTaskIds)
-        home.onAction(HomeAction.RemovalFinished(setOf(2)))
+        finishRemovals(setOf(2))
         runCurrent()
         assertEquals(listOf(tasks[0], tasks[2]), (home.state.value.list as HomeListState.Content).tasks)
         assertTrue(home.state.value.removingTaskIds.isEmpty())
@@ -163,7 +165,7 @@ class TaskCreationFlowTest {
         runCurrent()
         assertEquals(listOf(task), (home.state.value.list as HomeListState.Content).tasks)
         assertEquals(setOf(1), home.state.value.removingTaskIds)
-        home.onAction(HomeAction.RemovalFinished(setOf(1)))
+        finishRemovals(setOf(1))
         runCurrent()
         assertEquals(HomeListState.Empty, home.state.value.list)
     }
@@ -181,7 +183,7 @@ class TaskCreationFlowTest {
         // A task restored before its exit completes must survive the old callback.
         repository.tasks.value = listOf(tasks[0], tasks[1], tasks[3])
         runCurrent()
-        home.onAction(HomeAction.RemovalFinished(setOf(2, 3)))
+        finishRemovals(setOf(2, 3))
         runCurrent()
         assertEquals(listOf(tasks[0], tasks[1], tasks[3]), (home.state.value.list as HomeListState.Content).tasks)
     }
@@ -222,10 +224,10 @@ class TaskCreationFlowTest {
         repository.tasks.value = emptyList()
         runCurrent()
         assertTrue(notifications.isEmpty())
-        home.onAction(HomeAction.RemovalFinished(setOf(1)))
+        finishRemovals(setOf(1))
         runCurrent()
         assertEquals(listOf(original), notifications)
-        home.onAction(HomeAction.RemovalFinished(setOf(1)))
+        finishRemovals(setOf(1))
         runCurrent()
         assertEquals(1, notifications.size)
         home.onAction(HomeAction.UndoRemoval(notifications.single()))
@@ -234,6 +236,120 @@ class TaskCreationFlowTest {
         assertEquals("Edited", repository.storedTasks[1]?.title)
         assertEquals(false, repository.storedTasks[1]?.isCompleted)
         assertEquals(1, (home.state.value.list as HomeListState.Content).tasks.single().id)
+    }
+
+    @Test
+    fun `home completion is deduplicated and can be undone`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val task = Task(id = 1, title = "Swipe")
+        repository.storedTasks[1] = task
+        repository.tasks.value = listOf(task)
+        runCurrent()
+        home.onAction(HomeAction.CompleteTask(1))
+        home.onAction(HomeAction.DeleteTask(1))
+        runCurrent()
+        assertEquals(1, repository.updateCount)
+        assertEquals(true, repository.storedTasks[1]?.isCompleted)
+        assertEquals(false, repository.storedTasks[1]?.isDeleted)
+        assertEquals(setOf(1), home.state.value.removingTaskIds)
+        finishRemovals(setOf(1))
+        home.onAction(HomeAction.UndoRemoval(task))
+        runCurrent()
+        assertEquals(false, repository.storedTasks[1]?.isCompleted)
+        assertEquals(listOf(task), (home.state.value.list as HomeListState.Content).tasks)
+    }
+
+    @Test
+    fun `home deletion uses latest task and only soft deletes`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val task = Task(id = 1, title = "Latest title")
+        repository.storedTasks[1] = task
+        repository.tasks.value = listOf(task)
+        runCurrent()
+        home.onAction(HomeAction.DeleteTask(1))
+        runCurrent()
+        assertEquals(task.copy(isDeleted = true), repository.storedTasks[1])
+        assertTrue(home.state.value.operations.values.none { it is TaskOperation.Saving })
+        assertEquals(setOf(1), home.state.value.removingTaskIds)
+    }
+
+    @Test
+    fun `detail completion exits left and deletion exits right until removal finishes`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val completed = Task(id = 1, title = "Complete from detail")
+        val deleted = Task(id = 2, title = "Delete from detail")
+        repository.storedTasks[1] = completed
+        repository.storedTasks[2] = deleted
+        repository.tasks.value = listOf(completed, deleted)
+        runCurrent()
+        repository.completeTask(completed)
+        repository.deleteTaskSoftly(deleted)
+        runCurrent()
+        assertEquals(
+            TaskRemovalDirection.Left,
+            (home.state.value.operations[1] as? TaskOperation.Removing)?.kind?.direction,
+        )
+        assertEquals(
+            TaskRemovalDirection.Right,
+            (home.state.value.operations[2] as? TaskOperation.Removing)?.kind?.direction,
+        )
+        assertEquals(listOf(completed, deleted), (home.state.value.list as HomeListState.Content).tasks)
+        finishRemovals(setOf(1, 2))
+        runCurrent()
+        assertTrue(home.state.value.operations.isEmpty())
+    }
+
+    @Test
+    fun `old completion cannot remove a restored task during a later operation`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val task = Task(id = 1, title = "Task")
+        repository.storedTasks[1] = task
+        repository.tasks.value = listOf(task)
+        runCurrent()
+        home.onAction(HomeAction.CompleteTask(1))
+        runCurrent()
+        val old = home.state.value.operations[1] as TaskOperation.Removing
+        repository.updateTask(task)
+        runCurrent()
+        assertTrue(home.state.value.operations.isEmpty())
+        home.onAction(HomeAction.DeleteTask(1))
+        runCurrent()
+        val latest = home.state.value.operations[1] as TaskOperation.Removing
+        assertTrue(old.id != latest.id)
+        home.onAction(HomeAction.RemovalFinished(1, old.id))
+        runCurrent()
+        assertEquals(latest, home.state.value.operations[1])
+        home.onAction(HomeAction.RemovalFinished(1, latest.id))
+        runCurrent()
+        assertTrue(home.state.value.operations.isEmpty())
+        assertEquals(HomeListState.Empty, home.state.value.list)
+    }
+
+    @Test
+    fun `second removal does not replace the first operation`() = runTest(dispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { home.state.collect {} }
+        val first = Task(id = 1, title = "First")
+        val second = Task(id = 2, title = "Second")
+        repository.storedTasks.putAll(mapOf(1 to first, 2 to second))
+        repository.tasks.value = listOf(first, second)
+        runCurrent()
+        home.onAction(HomeAction.CompleteTask(1))
+        runCurrent()
+        val firstOperation = home.state.value.operations[1] as TaskOperation.Removing
+        home.onAction(HomeAction.DeleteTask(2))
+        runCurrent()
+        assertEquals(firstOperation, home.state.value.operations[1])
+        home.onAction(HomeAction.RemovalFinished(1, firstOperation.id))
+        runCurrent()
+        assertEquals(setOf(2), home.state.value.operations.keys)
+        assertEquals(listOf(second), (home.state.value.list as HomeListState.Content).tasks)
+    }
+
+    private fun finishRemovals(ids: Set<Int>) {
+        ids.forEach { id ->
+            val operation = home.state.value.operations[id] as? TaskOperation.Removing
+            home.onAction(HomeAction.RemovalFinished(id, operation?.id ?: -1L))
+        }
     }
 
     private class FakeRepository : TaskRepository {
@@ -257,8 +373,9 @@ class TaskCreationFlowTest {
             storedTasks[task.id] = task
             tasks.value = storedTasks.values.filter { !it.isCompleted && !it.isDeleted }
         }
-        override suspend fun completeTask(task: Task, isCompleted: Boolean) = Unit
-        override suspend fun deleteTaskSoftly(task: Task) = Unit
+        override suspend fun completeTask(task: Task, isCompleted: Boolean) =
+            updateTask(task.copy(isCompleted = isCompleted))
+        override suspend fun deleteTaskSoftly(task: Task) = updateTask(task.copy(isDeleted = true))
         override suspend fun clearTrash() = Unit
     }
 }
