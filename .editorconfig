@@ -1,0 +1,33 @@
+# 检查：./gradlew ktlintCheck；自动格式化：./gradlew ktlintFormat。
+# Boolean 取反使用 value.not()，此项目约定由代码审查保证。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+ktlint_code_style = android_studio
+max_line_length = 120
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+ij_kotlin_name_count_to_use_star_import = 2147483647
+ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
+ij_kotlin_packages_to_use_import_on_demand = unset
+# Compose UI 函数允许 PascalCase。
+ktlint_function_naming_ignore_when_annotated_with = Composable
+
+[*.md]
+trim_trailing_whitespace = false
+
+# 保留现有 task_detail 包名，覆盖主代码、变体与测试；其他包遵循标准命名。
+[app/src/**/task_detail/*.kt]
+ktlint_standard_package-name = disabled
+
+# 文件同时承载时间分类与日历规则，保留领域名称。
+[app/src/main/java/com/josense/locktask/domain/time/TaskTimeRule.kt]
+ktlint_standard_filename = disabled

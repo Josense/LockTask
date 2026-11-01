@@ -17,26 +17,35 @@ class CreateTaskViewModel(private val taskRepository: TaskRepository) : ViewMode
     fun onAction(action: CreateTaskAction) {
         when (action) {
             is CreateTaskAction.TitleChanged -> mutableState.update {
-                if (it.submission == Submission.Saving || it.submission is Submission.Succeeded) it
-                else it.copy(title = action.title, submission = Submission.Idle)
+                if (it.submission == Submission.Saving || it.submission is Submission.Succeeded) {
+                    it
+                } else {
+                    it.copy(title = action.title, submission = Submission.Idle)
+                }
             }
             CreateTaskAction.ToggleLockNotify -> mutableState.update {
-                if (it.submission == Submission.Saving || it.submission is Submission.Succeeded) it
-                else it.copy(needLockNotify = !it.needLockNotify)
+                if (it.submission == Submission.Saving || it.submission is Submission.Succeeded) {
+                    it
+                } else {
+                    it.copy(needLockNotify = !it.needLockNotify)
+                }
             }
             CreateTaskAction.Submit -> submit()
-
         }
     }
 
     private fun submit() {
         val input = state.value
-        if (input.submission == Submission.Saving || input.submission is Submission.Succeeded || input.title.isBlank()) return
+        if (input.submission == Submission.Saving || input.submission is Submission.Succeeded ||
+            input.title.isBlank()
+        ) {
+            return
+        }
         mutableState.update { it.copy(submission = Submission.Saving) }
         viewModelScope.launch {
             try {
                 val taskId = taskRepository.insertTask(
-                    Task(title = input.title, needLockNotify = input.needLockNotify)
+                    Task(title = input.title, needLockNotify = input.needLockNotify),
                 )
                 mutableState.update { it.copy(submission = Submission.Succeeded(taskId)) }
             } catch (cancelled: CancellationException) {

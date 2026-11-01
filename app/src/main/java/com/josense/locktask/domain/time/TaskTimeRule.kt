@@ -5,7 +5,10 @@ import java.util.TimeZone
 
 /** Calendar-day rules in the user's timezone, independent of Android and display language. */
 enum class TaskTimeDisplay {
-    Today, Yesterday, ThisYear, OtherYear
+    Today,
+    Yesterday,
+    ThisYear,
+    OtherYear,
 }
 
 fun taskTimeDisplay(
@@ -25,7 +28,6 @@ fun taskTimeDisplay(
     }
 }
 
-private fun Calendar.isSameDay(other: Calendar): Boolean =
-    get(Calendar.ERA) == other.get(Calendar.ERA) &&
-        get(Calendar.YEAR) == other.get(Calendar.YEAR) &&
-        get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)
+private fun Calendar.isSameDay(other: Calendar): Boolean = get(Calendar.ERA) == other.get(Calendar.ERA) &&
+    get(Calendar.YEAR) == other.get(Calendar.YEAR) &&
+    get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)

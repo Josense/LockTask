@@ -40,17 +40,14 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun LockTaskTheme(
-    extendedTypography: ExtendedTypography = ExtendedTypography(),
-    content: @Composable () -> Unit
-) {
+fun LockTaskTheme(extendedTypography: ExtendedTypography = ExtendedTypography(), content: @Composable () -> Unit) {
     CompositionLocalProvider(
-        LocalExtendedTypography provides extendedTypography
+        LocalExtendedTypography provides extendedTypography,
     ) {
         MaterialTheme(
             colorScheme = LightColorScheme,
             typography = Typography,
-            content = content
+            content = content,
         )
     }
 }

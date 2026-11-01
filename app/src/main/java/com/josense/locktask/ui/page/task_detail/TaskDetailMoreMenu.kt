@@ -20,10 +20,7 @@ import androidx.compose.ui.res.stringResource
 import com.josense.locktask.R
 
 @Composable
-internal fun TaskDetailMoreMenu(
-    enabled: Boolean,
-    onDelete: () -> Unit,
-) {
+internal fun TaskDetailMoreMenu(enabled: Boolean, onDelete: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(enabled = enabled, onClick = { expanded = true }) {

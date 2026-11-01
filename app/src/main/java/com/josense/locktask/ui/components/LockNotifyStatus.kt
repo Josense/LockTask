@@ -15,12 +15,18 @@ fun LockNotifyStatus(needLockNotify: Boolean) {
     val colors = MaterialTheme.colorScheme
     Icon(
         painter = painterResource(
-            if (needLockNotify) R.drawable.ic_pinboard_unread_filled
-            else R.drawable.ic_pinboard_unread
+            if (needLockNotify) {
+                R.drawable.ic_pinboard_unread_filled
+            } else {
+                R.drawable.ic_pinboard_unread
+            },
         ),
         contentDescription = stringResource(
-            if (needLockNotify) R.string.lock_notify_enabled
-            else R.string.lock_notify_disabled
+            if (needLockNotify) {
+                R.string.lock_notify_enabled
+            } else {
+                R.string.lock_notify_disabled
+            },
         ),
         modifier = Modifier.size(24.dp),
         tint = if (needLockNotify) colors.primary else colors.outline,

@@ -1,21 +1,24 @@
 package com.josense.locktask.ui.page.task_detail
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.josense.locktask.debug.DetailSaveFailure
 import com.josense.locktask.debug.FailingDetailRepository
-import androidx.lifecycle.viewModelScope
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.repository.TaskRepository
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.flow.first
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TaskDetailViewModelTest {
@@ -23,7 +26,8 @@ class TaskDetailViewModelTest {
     fun toggleSavesIntentAndUpdateTime() = runBlocking {
         val repository = Repository()
         val model = TaskDetailViewModel(
-            repository, SavedStateHandle(mapOf("taskId" to 1)),
+            repository,
+            SavedStateHandle(mapOf("taskId" to 1)),
         )
         try {
             withTimeout(5000) { model.uiState.first { it.task != null } }
@@ -45,7 +49,8 @@ class TaskDetailViewModelTest {
     fun failedToggleKeepsIntentAndPermitsRetry() = runBlocking {
         val repository = Repository().apply { fail = true }
         val model = TaskDetailViewModel(
-            repository, SavedStateHandle(mapOf("taskId" to 1)),
+            repository,
+            SavedStateHandle(mapOf("taskId" to 1)),
         )
         try {
             withTimeout(5000) { model.uiState.first { it.task != null } }
@@ -119,7 +124,7 @@ class TaskDetailViewModelTest {
 
     internal class Repository : TaskRepository {
         val task = MutableStateFlow(
-            Task(1, "Title", createAt = Date(0), updateAt = Date(0))
+            Task(1, "Title", createAt = Date(0), updateAt = Date(0)),
         )
         var fail = false
         override fun getTaskById(taskId: Int) = task

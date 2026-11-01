@@ -14,10 +14,10 @@ import com.josense.locktask.ui.page.home.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.koin.core.qualifier.named
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -47,7 +47,7 @@ val appModule = module {
         Room.databaseBuilder(
             androidContext(),
             TaskDatabase::class.java,
-            "task_database"
+            "task_database",
         ).build()
     }
 

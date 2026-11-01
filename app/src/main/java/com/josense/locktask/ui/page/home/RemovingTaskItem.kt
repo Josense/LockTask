@@ -11,6 +11,7 @@ internal object TaskRemovalTiming {
     const val SLIDE_MILLIS = 500
     const val COLLAPSE_MILLIS = 200
     const val EXIT_MILLIS = SLIDE_MILLIS + COLLAPSE_MILLIS
+
     // Allow the final animation frame to render before removing the retained row.
     private const val FINAL_FRAME_BUFFER_MILLIS = 50
     const val REMOVAL_ACK_DELAY_MILLIS = EXIT_MILLIS + FINAL_FRAME_BUFFER_MILLIS
@@ -22,10 +23,12 @@ internal fun RemovingTaskItem(visible: Boolean, content: @Composable () -> Unit)
     AnimatedVisibility(
         visible = visible,
         exit = slideOutHorizontally(tween(TaskRemovalTiming.SLIDE_MILLIS)) { width -> width } +
-            shrinkVertically(tween(
-                durationMillis = TaskRemovalTiming.COLLAPSE_MILLIS,
-                delayMillis = TaskRemovalTiming.SLIDE_MILLIS,
-            )),
+            shrinkVertically(
+                tween(
+                    durationMillis = TaskRemovalTiming.COLLAPSE_MILLIS,
+                    delayMillis = TaskRemovalTiming.SLIDE_MILLIS,
+                ),
+            ),
     ) {
         content()
     }

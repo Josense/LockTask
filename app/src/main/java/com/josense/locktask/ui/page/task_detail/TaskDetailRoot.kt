@@ -29,10 +29,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskDetailRoot(
-    viewModel: TaskDetailViewModel = koinViewModel(),
-    onBackClick: () -> Unit,
-) {
+fun TaskDetailRoot(viewModel: TaskDetailViewModel = koinViewModel(), onBackClick: () -> Unit) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val task = state.task
     LaunchedEffect(state.isFinished) {
@@ -71,7 +68,7 @@ fun TaskDetailRoot(
                             Icon(
                                 Icons.Outlined.Done,
                                 contentDescription =
-                                    stringResource(R.string.complete),
+                                stringResource(R.string.complete),
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
@@ -93,7 +90,7 @@ fun TaskDetailRoot(
                     enabled = state.isSaving.not() && it.isDeleted.not(),
                     onCheckedChange = { enabled ->
                         viewModel.onAction(
-                            TaskDetailAction.SetLockNotify(enabled)
+                            TaskDetailAction.SetLockNotify(enabled),
                         )
                     },
                 )
@@ -113,4 +110,3 @@ fun TaskDetailRoot(
         }
     }
 }
-

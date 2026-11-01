@@ -28,10 +28,12 @@ internal fun EmptyTaskIllustration(modifier: Modifier = Modifier) {
 
         val workerError = remember { mutableStateOf<Throwable?>(null) }
         val worker = rememberRiveWorkerOrNull(workerError) ?: return@Box
-        when (val file = rememberRiveFile(
-            RiveFileSource.RawRes.from(R.raw.task_empty_companion),
-            worker,
-        )) {
+        when (
+            val file = rememberRiveFile(
+                RiveFileSource.RawRes.from(R.raw.task_empty_companion),
+                worker,
+            )
+        ) {
             is Result.Success -> {
                 val viewModel = rememberViewModelInstanceResult(
                     file.value,

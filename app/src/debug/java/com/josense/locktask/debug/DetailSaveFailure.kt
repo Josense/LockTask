@@ -21,10 +21,8 @@ internal class DetailSaveFailure {
     }
 }
 
-internal class FailingDetailRepository(
-    private val delegate: TaskRepository,
-    private val failure: DetailSaveFailure,
-) : TaskRepository by delegate {
+internal class FailingDetailRepository(private val delegate: TaskRepository, private val failure: DetailSaveFailure) :
+    TaskRepository by delegate {
     override suspend fun updateTask(task: Task) {
         failure.check()
         delegate.updateTask(task)

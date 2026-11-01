@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.ktlint)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
@@ -71,7 +72,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
 
@@ -81,4 +81,14 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+ktlint {
+    version.set(libs.versions.ktlint)
+    android.set(true)
+    outputToConsole.set(true)
+    ignoreFailures.set(false)
+    filter {
+        exclude("**/build/**")
+    }
 }

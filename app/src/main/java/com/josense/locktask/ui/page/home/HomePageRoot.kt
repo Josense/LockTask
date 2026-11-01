@@ -9,34 +9,34 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.josense.locktask.ui.notification.NotificationDelegate
-import com.josense.locktask.ui.notification.HomeEffect
-import com.josense.locktask.ui.notification.AccessNotice
-import com.josense.locktask.ui.notification.taskCreated
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.flow.collectLatest
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import org.koin.androidx.compose.koinViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.josense.locktask.R
 import com.josense.locktask.domain.model.Task
+import com.josense.locktask.ui.notification.AccessNotice
+import com.josense.locktask.ui.notification.HomeEffect
+import com.josense.locktask.ui.notification.NotificationDelegate
+import com.josense.locktask.ui.notification.taskCreated
 import com.josense.locktask.ui.page.create.CreateTaskSheet
+import kotlinx.coroutines.flow.collectLatest
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +45,6 @@ fun HomePageRoot(
     notifications: NotificationDelegate? = null,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
-
     val homeState by viewModel.state.collectAsStateWithLifecycle()
     notifications?.HomeEffect(homeState, viewModel::onAction)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -75,24 +74,24 @@ fun HomePageRoot(
                 Column {
                     Text(
                         text = stringResource(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
                     )
                     Text(
                         text = stringResource(R.string.app_description),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             })
         },
-        floatingActionButton =  {
+        floatingActionButton = {
             FloatingActionButton(onClick = { showAddTaskSheet = !showAddTaskSheet }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
-        }
+        },
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
         ) {
             notifications?.AccessNotice(homeState)
             HomeScreen(

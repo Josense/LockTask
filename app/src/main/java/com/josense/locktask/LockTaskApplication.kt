@@ -9,7 +9,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
-class LockTaskApplication: Application() {
+class LockTaskApplication : Application() {
     private val notificationSync: TaskNotificationSync by inject()
 
     override fun onCreate() {

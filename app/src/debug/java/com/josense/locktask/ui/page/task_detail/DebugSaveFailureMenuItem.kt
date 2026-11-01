@@ -1,7 +1,7 @@
 package com.josense.locktask.ui.page.task_detail
 
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,9 +20,12 @@ internal fun DebugSaveFailureMenuItem(onDismiss: () -> Unit) {
         text = {
             Text(
                 stringResource(
-                    if (armed) R.string.debug_cancel_save_failure
-                    else R.string.debug_arm_save_failure,
-                )
+                    if (armed) {
+                        R.string.debug_cancel_save_failure
+                    } else {
+                        R.string.debug_arm_save_failure
+                    },
+                ),
             )
         },
         onClick = {

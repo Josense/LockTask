@@ -1,18 +1,21 @@
 package com.josense.locktask.notification
 
-import com.josense.locktask.R
 import android.Manifest
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
+import com.josense.locktask.R
 import com.josense.locktask.data.notification.AndroidTaskNotificationGateway
 import com.josense.locktask.domain.notification.TaskNotification
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TaskNotificationDeviceTest {
@@ -24,7 +27,7 @@ class TaskNotificationDeviceTest {
             instrumentation.uiAutomation
                 .executeShellCommand(
                     "pm grant ${context.packageName} " +
-                        Manifest.permission.POST_NOTIFICATIONS
+                        Manifest.permission.POST_NOTIFICATIONS,
                 )
                 .use {
                     android.os.ParcelFileDescriptor.AutoCloseInputStream(it)
@@ -42,7 +45,7 @@ class TaskNotificationDeviceTest {
                     listOf(900001),
                     "Device A",
                     "Body",
-                )
+                ),
             )
             gateway.publish(
                 TaskNotification(
@@ -50,7 +53,7 @@ class TaskNotificationDeviceTest {
                     listOf(900002),
                     "Device B",
                     "Body",
-                )
+                ),
             )
             awaitCondition {
                 manager.activeNotifications.count {
@@ -69,7 +72,7 @@ class TaskNotificationDeviceTest {
                 )
                 assertTrue(
                     it.notification.flags and Notification.FLAG_ONGOING_EVENT !=
-                        0
+                        0,
                 )
                 assertEquals(
                     0,
@@ -87,7 +90,7 @@ class TaskNotificationDeviceTest {
                     listOf(900001),
                     "Updated",
                     "Body",
-                )
+                ),
             )
             awaitCondition {
                 manager.activeNotifications

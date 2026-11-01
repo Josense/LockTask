@@ -15,10 +15,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TaskDetailViewModel(
-    private val taskRepository: TaskRepository,
-    savedStateHandle: SavedStateHandle
-) : ViewModel() {
+class TaskDetailViewModel(private val taskRepository: TaskRepository, savedStateHandle: SavedStateHandle) :
+    ViewModel() {
     private val taskDetailRoute = savedStateHandle.toRoute<TaskDetail>()
 
     private val mutableUiState = MutableStateFlow(TaskDetailState())
@@ -50,7 +48,7 @@ class TaskDetailViewModel(
                                 task.copy(
                                     needLockNotify = action.enabled,
                                     updateAt = Date(),
-                                )
+                                ),
                             )
                         }
                     }

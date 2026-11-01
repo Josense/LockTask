@@ -1,22 +1,22 @@
 package com.josense.locktask.ui.page.task_detail
 
 import androidx.activity.compose.setContent
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.josense.locktask.debug.DetailSaveFailure
 import com.josense.locktask.debug.FailingDetailRepository
 import com.josense.locktask.ui.MainActivity
 import com.josense.locktask.ui.theme.LockTaskTheme
 import kotlinx.coroutines.cancel
-import org.junit.Assert.assertTrue
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.koin.core.context.GlobalContext
@@ -60,11 +60,13 @@ class TaskDetailSaveFailureUiTest {
             if (failure.armed.value) failure.toggle()
         }
     }
+
     @Test
     fun deleteMenuSoftDeletesAndReturns() {
         val repository = TaskDetailViewModelTest.Repository()
         val model = TaskDetailViewModel(
-            repository, SavedStateHandle(mapOf("taskId" to 1)),
+            repository,
+            SavedStateHandle(mapOf("taskId" to 1)),
         )
         var returned = false
         try {

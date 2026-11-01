@@ -24,10 +24,7 @@ import com.josense.locktask.R
 import com.josense.locktask.domain.notification.NotificationAccess
 
 @Composable
-internal fun NotificationAccessCard(
-    access: NotificationAccess,
-    onEnable: () -> Unit,
-) {
+internal fun NotificationAccessCard(access: NotificationAccess, onEnable: () -> Unit) {
     val description = when (access) {
         NotificationAccess.PermissionRequired ->
             R.string.notification_permission_description

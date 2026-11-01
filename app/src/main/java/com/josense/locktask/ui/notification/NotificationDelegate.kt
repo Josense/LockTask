@@ -51,7 +51,7 @@ class NotificationDelegate(
 
     private val permission =
         activity.registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
+            ActivityResultContracts.RequestPermission(),
         ) {
             onAction(Action.Refresh)
         }
@@ -59,12 +59,14 @@ class NotificationDelegate(
     init {
         val restored =
             activity.savedStateRegistry.consumeRestoredStateForKey(SAVED_STATE)
-        if (restored == null) acceptIntent(activity.intent)
-        else
+        if (restored == null) {
+            acceptIntent(activity.intent)
+        } else {
             restored
                 .getInt(TARGET_TASK_KEY, 0)
                 .takeIf { it > 0 }
                 ?.let { acceptTask(it) }
+        }
         activity.savedStateRegistry.registerSavedStateProvider(SAVED_STATE) {
             Bundle().apply {
                 state.target?.let { putInt(TARGET_TASK_KEY, it.taskId) }
@@ -76,7 +78,7 @@ class NotificationDelegate(
                 override fun onResume(owner: LifecycleOwner) {
                     onAction(Action.Refresh)
                 }
-            }
+            },
         )
     }
 
@@ -84,10 +86,11 @@ class NotificationDelegate(
         val uri = intent.data ?: return
         if (
             uri.scheme !=
-                activity.getString(R.string.notification_uri_scheme) ||
-                uri.host != activity.getString(R.string.notification_uri_host)
-        )
+            activity.getString(R.string.notification_uri_scheme) ||
+            uri.host != activity.getString(R.string.notification_uri_host)
+        ) {
             return
+        }
         uri.lastPathSegment?.toIntOrNull()?.takeIf { it > 0 }?.let(::acceptTask)
     }
 
@@ -111,8 +114,9 @@ class NotificationDelegate(
                             .getTaskById(action.taskId)
                             .first()
                             ?.needLockNotify == true
-                    )
+                    ) {
                         enable(automatic = true)
+                    }
                 }
             }
             is Action.Consume ->
@@ -129,41 +133,47 @@ class NotificationDelegate(
             val preferences = activity.getPreferences(Context.MODE_PRIVATE)
             if (
                 access == NotificationAccess.PermissionRequired &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
             ) {
                 val asked = preferences.getBoolean(PERMISSION_ASKED_KEY, false)
                 if (
                     asked.not() ||
-                        (automatic.not() &&
+                    (
+                        automatic.not() &&
                             activity.shouldShowRequestPermissionRationale(
-                                Manifest.permission.POST_NOTIFICATIONS
-                            ))
+                                Manifest.permission.POST_NOTIFICATIONS,
+                            )
+                        )
                 ) {
                     preferences.edit { putBoolean(PERMISSION_ASKED_KEY, true) }
                     permission.launch(Manifest.permission.POST_NOTIFICATIONS)
                     return@launch
                 }
             }
-            if (automatic || access == NotificationAccess.Available)
+            if (automatic || access == NotificationAccess.Available) {
                 return@launch
+            }
             val channelId = activity.getString(R.string.notification_channel_id)
             val settings =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     Intent(
-                            if (access == NotificationAccess.ChannelDisabled)
-                                Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
-                            else Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                        )
+                        if (access == NotificationAccess.ChannelDisabled) {
+                            Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
+                        } else {
+                            Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                        },
+                    )
                         .putExtra(
                             Settings.EXTRA_APP_PACKAGE,
                             activity.packageName,
                         )
                         .putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
-                } else
+                } else {
                     Intent(
                         Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         "package:${activity.packageName}".toUri(),
                     )
+                }
             activity.startActivity(settings)
         }
     }

@@ -1,12 +1,12 @@
 package com.josense.locktask.ui.page
 
 import androidx.lifecycle.ViewModelStore
-import com.josense.locktask.ui.page.create.Submission
 import androidx.lifecycle.viewModelScope
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.repository.TaskRepository
 import com.josense.locktask.ui.page.create.CreateTaskAction
 import com.josense.locktask.ui.page.create.CreateTaskViewModel
+import com.josense.locktask.ui.page.create.Submission
 import com.josense.locktask.ui.page.home.HomeAction
 import com.josense.locktask.ui.page.home.HomeListState
 import com.josense.locktask.ui.page.home.HomeViewModel
@@ -18,9 +18,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 

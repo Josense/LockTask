@@ -1,6 +1,5 @@
 package com.josense.locktask.domain.model
 
-
 import java.util.Date
 
 data class Task(

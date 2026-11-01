@@ -19,5 +19,4 @@ interface TaskRepository {
     suspend fun deleteTaskSoftly(task: Task)
 
     suspend fun clearTrash()
-
 }

@@ -1,8 +1,6 @@
 package com.josense.locktask.ui.page.home
 
 import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,35 +13,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.delay
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.josense.locktask.R
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.components.LockNotifyStatus
-import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
+import org.koin.androidx.compose.koinViewModel
 
 private const val TASK_HIGHLIGHT_DURATION_MILLIS = 1_500L
-
 
 @Composable
 fun HomeScreen(
@@ -51,7 +50,6 @@ fun HomeScreen(
     onTaskClick: (Task) -> Unit = {},
     homeViewModel: HomeViewModel = koinViewModel(),
 ) {
-
     val state by homeViewModel.state.collectAsStateWithLifecycle()
 
     HomeScreen(
@@ -67,11 +65,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeScreen(
-    state: HomeState,
-    modifier: Modifier = Modifier,
-    onAction: (HomeAction) -> Unit = {},
-) {
+fun HomeScreen(state: HomeState, modifier: Modifier = Modifier, onAction: (HomeAction) -> Unit = {}) {
     val listState = rememberLazyListState()
     val nowMillis = currentTaskTimeMillis()
     val tasks = (state.list as? HomeListState.Content)?.tasks.orEmpty()
@@ -144,7 +138,6 @@ fun HomeScreen(
     }
 }
 
-
 @Composable
 fun EmptyHomeScreen(modifier: Modifier = Modifier) {
     Box(
@@ -181,8 +174,11 @@ fun TaskItem(
         modifier = Modifier.fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
             .background(
-                if (highlighted) MaterialTheme.colorScheme.secondaryContainer
-                else Color.Transparent
+                if (highlighted) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    Color.Transparent
+                },
             )
             .clickable(enabled = enabled) { onTaskClick(task) }
             .padding(horizontal = 16.dp, vertical = 12.dp),

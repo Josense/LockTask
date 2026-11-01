@@ -1,19 +1,19 @@
 package com.josense.locktask.ui.page.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.josense.locktask.domain.repository.TaskRepository
-import android.util.Log
 import com.josense.locktask.domain.model.Task
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
+import com.josense.locktask.domain.repository.TaskRepository
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -65,10 +65,12 @@ class HomeViewModel(private val taskRepository: TaskRepository) : ViewModel() {
             try {
                 val task = taskRepository.getTaskById(snapshot.id).first()
                     ?: error("Removed task no longer exists")
-                taskRepository.updateTask(task.copy(
-                    isCompleted = snapshot.isCompleted,
-                    isDeleted = snapshot.isDeleted,
-                ))
+                taskRepository.updateTask(
+                    task.copy(
+                        isCompleted = snapshot.isCompleted,
+                        isDeleted = snapshot.isDeleted,
+                    ),
+                )
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {

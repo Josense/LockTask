@@ -15,10 +15,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.josense.locktask.R
-import com.josense.locktask.domain.notification.*
+import com.josense.locktask.domain.notification.NotificationAccess
+import com.josense.locktask.domain.notification.TaskNotification
+import com.josense.locktask.domain.notification.TaskNotificationGateway
 
-class AndroidTaskNotificationGateway(private val context: Context) :
-    TaskNotificationGateway {
+class AndroidTaskNotificationGateway(private val context: Context) : TaskNotificationGateway {
     private val manager =
         context.getSystemService(NotificationManager::class.java)
     private val channelId = context.getString(R.string.notification_channel_id)
@@ -33,16 +34,16 @@ class AndroidTaskNotificationGateway(private val context: Context) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             manager.createNotificationChannel(
                 NotificationChannel(
-                        channelId,
-                        context.getString(R.string.task_notification_channel),
-                        NotificationManager.IMPORTANCE_DEFAULT,
-                    )
+                    channelId,
+                    context.getString(R.string.task_notification_channel),
+                    NotificationManager.IMPORTANCE_DEFAULT,
+                )
                     .apply {
                         setSound(null, null)
                         enableVibration(false)
                         lockscreenVisibility =
                             NotificationCompat.VISIBILITY_PUBLIC
-                    }
+                    },
             )
         }
     }
@@ -63,54 +64,53 @@ class AndroidTaskNotificationGateway(private val context: Context) :
 
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                 manager.getNotificationChannel(channelId)?.importance ==
-                    NotificationManager.IMPORTANCE_NONE ->
+                NotificationManager.IMPORTANCE_NONE ->
                 NotificationAccess.ChannelDisabled
 
             else -> NotificationAccess.Available
         }
     }
 
-    override suspend fun publishedKeys(): Set<String> =
-        manager.activeNotifications
-            .filter {
-                it.id == NOTIFICATION_ID &&
-                    it.tag?.startsWith(TAG_PREFIX) == true
-            }
-            .mapTo(mutableSetOf()) { it.tag.removePrefix(TAG_PREFIX) }
+    override suspend fun publishedKeys(): Set<String> = manager.activeNotifications
+        .filter {
+            it.id == NOTIFICATION_ID &&
+                it.tag?.startsWith(TAG_PREFIX) == true
+        }
+        .mapTo(mutableSetOf()) { it.tag.removePrefix(TAG_PREFIX) }
 
     override suspend fun publish(notification: TaskNotification) {
         check(access() == NotificationAccess.Available)
         // Resolve the entry point without a dependency on Presentation classes.
         val intent =
             requireNotNull(
-                    context.packageManager.getLaunchIntentForPackage(
-                        context.packageName
-                    )
-                )
+                context.packageManager.getLaunchIntentForPackage(
+                    context.packageName,
+                ),
+            )
                 .apply {
                     data =
                         Uri.Builder()
                             .scheme(
                                 context.getString(
-                                    R.string.notification_uri_scheme
-                                )
+                                    R.string.notification_uri_scheme,
+                                ),
                             )
                             .authority(
                                 context.getString(
-                                    R.string.notification_uri_host
-                                )
+                                    R.string.notification_uri_host,
+                                ),
                             )
                             .appendPath(notification.taskIds.first().toString())
                             .appendQueryParameter(
                                 context.getString(
-                                    R.string.notification_uri_key
+                                    R.string.notification_uri_key,
                                 ),
                                 notification.key,
                             )
                             .build()
                     flags =
                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
         val pendingIntent =
             PendingIntent.getActivity(
@@ -128,10 +128,10 @@ class AndroidTaskNotificationGateway(private val context: Context) :
                 .setContentText(notification.content)
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
                 .setCustomContentView(
-                    contentView(notification, expanded = false)
+                    contentView(notification, expanded = false),
                 )
                 .setCustomBigContentView(
-                    contentView(notification, expanded = true)
+                    contentView(notification, expanded = true),
                 )
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
@@ -144,17 +144,17 @@ class AndroidTaskNotificationGateway(private val context: Context) :
         manager.notify(TAG_PREFIX + notification.key, NOTIFICATION_ID, built)
     }
 
-    private fun contentView(
-        notification: TaskNotification,
-        expanded: Boolean,
-    ): RemoteViews =
+    private fun contentView(notification: TaskNotification, expanded: Boolean): RemoteViews =
         RemoteViews(context.packageName, R.layout.notification_task).apply {
             setTextViewText(R.id.notification_title, notification.title)
             setTextViewText(R.id.notification_body, notification.content)
             setViewVisibility(
                 R.id.notification_body,
-                if (expanded && notification.content.isNotBlank()) View.VISIBLE
-                else View.GONE,
+                if (expanded && notification.content.isNotBlank()) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                },
             )
         }
 

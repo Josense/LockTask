@@ -15,14 +15,12 @@ fun NotificationDelegate.NavigationEffect(returnHome: () -> Unit) {
 }
 
 @Composable
-fun NotificationDelegate.HomeEffect(
-    home: HomeState,
-    dispatch: (HomeAction) -> Unit,
-) {
+fun NotificationDelegate.HomeEffect(home: HomeState, dispatch: (HomeAction) -> Unit) {
     val target = state.target
     LaunchedEffect(target, home.list) {
-        if (target == null || home.list == HomeListState.Loading)
+        if (target == null || home.list == HomeListState.Loading) {
             return@LaunchedEffect
+        }
         val tasks = (home.list as? HomeListState.Content)?.tasks.orEmpty()
         if (
             tasks.any {
@@ -42,9 +40,9 @@ fun NotificationDelegate.AccessNotice(home: HomeState) {
     val tasks = (home.list as? HomeListState.Content)?.tasks.orEmpty()
     if (
         state.access != NotificationAccess.Available &&
-            tasks.any {
-                it.needLockNotify && it.isCompleted.not() && it.isDeleted.not()
-            }
+        tasks.any {
+            it.needLockNotify && it.isCompleted.not() && it.isDeleted.not()
+        }
     ) {
         NotificationAccessCard(
             access = state.access,

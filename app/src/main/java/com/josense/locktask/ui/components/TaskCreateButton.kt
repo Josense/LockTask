@@ -30,7 +30,7 @@ fun TaskCreateButton(
     onCreate: () -> Unit,
 ) {
     val currentMode = stringResource(
-        if (needLockNotify) R.string.lock_notify_label else R.string.in_app_only_label
+        if (needLockNotify) R.string.lock_notify_label else R.string.in_app_only_label,
     )
     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
         Button(
@@ -60,7 +60,7 @@ fun TaskCreateButton(
             Icon(
                 Icons.Default.SwapVert,
                 contentDescription = stringResource(
-                    if (needLockNotify) R.string.switch_to_in_app_only else R.string.switch_to_lock_notify
+                    if (needLockNotify) R.string.switch_to_in_app_only else R.string.switch_to_lock_notify,
                 ),
             )
         }

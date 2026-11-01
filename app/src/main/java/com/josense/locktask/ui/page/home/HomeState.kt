@@ -8,7 +8,6 @@ sealed interface HomeListState {
     data class Content(val tasks: List<Task>) : HomeListState
 }
 
-
 data class HomeState(
     val list: HomeListState = HomeListState.Loading,
     val pendingAnchorTaskId: Int? = null,

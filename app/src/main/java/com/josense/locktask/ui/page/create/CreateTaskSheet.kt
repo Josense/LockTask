@@ -7,18 +7,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.josense.locktask.R
 import com.josense.locktask.ui.components.TaskCreateButton
 import com.josense.locktask.ui.components.input.KeyboardInputSheet
@@ -28,10 +28,7 @@ import com.josense.locktask.ui.theme.extendedTypography
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CreateTaskSheet(
-    onDismiss: () -> Unit,
-    onCreated: (Int) -> Unit,
-) {
+fun CreateTaskSheet(onDismiss: () -> Unit, onCreated: (Int) -> Unit) {
     // Each insertion into composition owns one creation session, including its ViewModel.
     val owner = remember {
         object : ViewModelStoreOwner {
@@ -68,7 +65,9 @@ fun CreateTaskSheet(
             )
         }
         TaskFuncBtnRow(
-            enableCreate = state.title.isNotBlank() && state.submission != Submission.Saving && state.submission !is Submission.Succeeded,
+            enableCreate =
+            state.title.isNotBlank() && state.submission != Submission.Saving &&
+                state.submission !is Submission.Succeeded,
             needLockNotify = state.needLockNotify,
             updateLockNotify = { viewModel.onAction(CreateTaskAction.ToggleLockNotify) },
             onCreated = { viewModel.onAction(CreateTaskAction.Submit) },
@@ -77,12 +76,7 @@ fun CreateTaskSheet(
 }
 
 @Composable
-fun TaskTitleInputField(
-    currentInput: String,
-    updateInput: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-
+fun TaskTitleInputField(currentInput: String, updateInput: (String) -> Unit, modifier: Modifier = Modifier) {
     BasicTextField(
         value = currentInput,
         onValueChange = updateInput,
@@ -93,22 +87,21 @@ fun TaskTitleInputField(
             .padding(TextFieldPadding),
         decorationBox = { innerTextField ->
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Box(modifier = Modifier.weight(1F)) {
                     if (currentInput.isEmpty()) {
                         Text(
                             text = stringResource(R.string.add_task_title_placeholder),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.extendedTypography.placeholderLarge
+                            style = MaterialTheme.extendedTypography.placeholderLarge,
                         )
                     }
 
                     innerTextField()
                 }
             }
-
-        }
+        },
     )
 }
 

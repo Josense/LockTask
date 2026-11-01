@@ -1,7 +1,9 @@
 package com.josense.locktask.notification
 
 import com.josense.locktask.domain.model.Task
-import com.josense.locktask.domain.notification.*
+import com.josense.locktask.domain.notification.NotificationAccess
+import com.josense.locktask.domain.notification.TaskNotification
+import com.josense.locktask.domain.notification.TaskNotificationGateway
 import com.josense.locktask.domain.repository.TaskRepository
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Level

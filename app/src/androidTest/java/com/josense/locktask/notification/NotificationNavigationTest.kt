@@ -24,13 +24,13 @@ class NotificationNavigationTest {
     fun notificationReturnsFromDetailAndScrollsToItsTask() {
         if (
             android.os.Build.VERSION.SDK_INT >=
-                android.os.Build.VERSION_CODES.TIRAMISU
+            android.os.Build.VERSION_CODES.TIRAMISU
         ) {
             InstrumentationRegistry.getInstrumentation()
                 .uiAutomation
                 .executeShellCommand(
                     "pm grant ${compose.activity.packageName} " +
-                        Manifest.permission.POST_NOTIFICATIONS
+                        Manifest.permission.POST_NOTIFICATIONS,
                 )
                 .use {
                     android.os.ParcelFileDescriptor.AutoCloseInputStream(it)
@@ -50,7 +50,7 @@ class NotificationNavigationTest {
                             Task(
                                 title = "$prefix-$index",
                                 createAt = Date(index.toLong()),
-                            )
+                            ),
                         )
                 }
             }

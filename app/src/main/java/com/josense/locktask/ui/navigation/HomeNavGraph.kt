@@ -22,7 +22,7 @@ fun HomeNavGraph(notifications: NotificationDelegate) {
         popExitTransition = { AppNavTransitions.DefaultExit },
         // 手势返回：使用相同效果，由导航系统处理进度与取消
         predictivePopEnterTransition = { AppNavTransitions.DefaultEnter },
-        predictivePopExitTransition = { AppNavTransitions.DefaultExit }
+        predictivePopExitTransition = { AppNavTransitions.DefaultExit },
     ) {
         composable<Home> {
             HomePageRoot(

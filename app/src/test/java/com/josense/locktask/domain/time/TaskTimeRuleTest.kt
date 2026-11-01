@@ -37,10 +37,18 @@ class TaskTimeRuleTest {
 
     @Test
     fun `yesterday uses calendar days across daylight saving changes`() {
-        check("2026-03-08 00:01", "2026-03-09 23:59", TaskTimeDisplay.Yesterday,
-            TimeZone.getTimeZone("America/New_York"))
-        check("2026-11-01 00:01", "2026-11-02 23:59", TaskTimeDisplay.Yesterday,
-            TimeZone.getTimeZone("America/New_York"))
+        check(
+            "2026-03-08 00:01",
+            "2026-03-09 23:59",
+            TaskTimeDisplay.Yesterday,
+            TimeZone.getTimeZone("America/New_York"),
+        )
+        check(
+            "2026-11-01 00:01",
+            "2026-11-02 23:59",
+            TaskTimeDisplay.Yesterday,
+            TimeZone.getTimeZone("America/New_York"),
+        )
     }
 
     @Test

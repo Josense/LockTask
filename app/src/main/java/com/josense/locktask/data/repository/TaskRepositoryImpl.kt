@@ -9,21 +9,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class TaskRepositoryImpl(private val taskDao: TaskDao) : TaskRepository {
-    override fun getAllTasks(): Flow<List<Task>> {
-        return taskDao.getAllTasks().map { entities ->
-            entities.map { it.toDomain() }
-        }
+    override fun getAllTasks(): Flow<List<Task>> = taskDao.getAllTasks().map { entities ->
+        entities.map { it.toDomain() }
     }
 
-    override fun getAllActiveTasks(): Flow<List<Task>> {
-        return taskDao.getActiveTasks().map { entities ->
-            entities.map { it.toDomain() }
-        }
+    override fun getAllActiveTasks(): Flow<List<Task>> = taskDao.getActiveTasks().map { entities ->
+        entities.map { it.toDomain() }
     }
 
-    override fun getTaskById(taskId: Int): Flow<Task?> {
-        return taskDao.getTaskById(taskId).map { it?.toDomain() }
-    }
+    override fun getTaskById(taskId: Int): Flow<Task?> = taskDao.getTaskById(taskId).map { it?.toDomain() }
 
     override suspend fun insertTask(task: Task) = taskDao.insert(task.toEntity()).toInt()
 

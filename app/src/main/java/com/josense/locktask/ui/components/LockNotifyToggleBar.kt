@@ -27,11 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.josense.locktask.R
 
 @Composable
-internal fun LockNotifyToggleBar(
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
+internal fun LockNotifyToggleBar(checked: Boolean, enabled: Boolean, onCheckedChange: (Boolean) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val iconTint by animateColorAsState(
         targetValue = when {
@@ -59,8 +55,11 @@ internal fun LockNotifyToggleBar(
         ) {
             Icon(
                 painter = painterResource(
-                    if (checked) R.drawable.ic_pinboard_unread_filled
-                    else R.drawable.ic_pinboard_unread,
+                    if (checked) {
+                        R.drawable.ic_pinboard_unread_filled
+                    } else {
+                        R.drawable.ic_pinboard_unread
+                    },
                 ),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),

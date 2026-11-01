@@ -19,4 +19,5 @@ data class TaskEntity(
 
 fun TaskEntity.toDomain() = Task(id, title, content, needLockNotify, isCompleted, isDeleted, createAt, updateAt)
 
-fun Task.toEntity(): TaskEntity = TaskEntity(id, title, content, needLockNotify, isCompleted, isDeleted, createAt, updateAt)
+fun Task.toEntity(): TaskEntity =
+    TaskEntity(id, title, content, needLockNotify, isCompleted, isDeleted, createAt, updateAt)

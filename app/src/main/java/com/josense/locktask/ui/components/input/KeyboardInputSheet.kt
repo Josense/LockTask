@@ -54,10 +54,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 
 /** 供业务内容指定首次聚焦的输入框和关闭面板，无需处理窗口或软键盘状态。 */
-class KeyboardInputSheetScope internal constructor(
-    val initialFocusModifier: Modifier,
-    val dismiss: () -> Unit,
-)
+class KeyboardInputSheetScope internal constructor(val initialFocusModifier: Modifier, val dismiss: () -> Unit)
 
 /**
  * 底部对齐、高度随内容调整的输入面板，首次入场与软键盘动画同步。
@@ -145,7 +142,7 @@ private fun InputSheetContent(
             entry.revealWithoutKeyboard()
         } else {
             // 此超时仅用于软键盘无法弹出时显示面板，不用于控制动画时序。
-            val keyboardStarted = withTimeoutOrNull(KeyboardStartTimeoutMillis) {
+            val keyboardStarted = withTimeoutOrNull(KEYBOARD_START_TIMEOUT_MILLIS) {
                 snapshotFlow { entry.hasStarted }.first { it }
             }
             if (keyboardStarted == null) entry.revealWithoutKeyboard()
@@ -164,7 +161,7 @@ private fun InputSheetContent(
         Box(
             Modifier.matchParentSize()
                 .semantics { contentDescription = dismissLabel }
-                .clickable(enabled = dismissEnabled, interactionSource = null, indication = null, onClick = dismiss)
+                .clickable(enabled = dismissEnabled, interactionSource = null, indication = null, onClick = dismiss),
         )
         Box(
             modifier = Modifier.fillMaxSize()
@@ -175,7 +172,14 @@ private fun InputSheetContent(
                 modifier = modifier.widthIn(max = 640.dp).fillMaxWidth()
                     .semantics {
                         paneTitle = title
-                        dismiss { if (dismissEnabled) { dismiss(); true } else false }
+                        dismiss {
+                            if (dismissEnabled) {
+                                dismiss()
+                                true
+                            } else {
+                                false
+                            }
+                        }
                     }
                     .graphicsLayer {
                         // 在绘制阶段读取当前帧的软键盘占用高度，保持面板入场与键盘动画同步。
@@ -192,7 +196,7 @@ private fun InputSheetContent(
             ) {
                 Column(
                     Modifier.verticalScroll(rememberScrollState())
-                        .padding(top = 16.dp, bottom = 16.dp)
+                        .padding(top = 16.dp, bottom = 16.dp),
                 ) {
                     scope.content()
                 }
@@ -201,4 +205,4 @@ private fun InputSheetContent(
     }
 }
 
-private const val KeyboardStartTimeoutMillis = 1_500L
+private const val KEYBOARD_START_TIMEOUT_MILLIS = 1_500L
