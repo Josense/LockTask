@@ -33,7 +33,11 @@ internal fun TaskDetailContent(
     SelectionContainer {
         TaskDetailLayout(
             task = task,
-            modifier = modifier,
+            modifier = modifier.clickable(
+                enabled = task.isDeleted.not(),
+                interactionSource = null,
+                indication = null,
+            ) { onEdit(TaskDetailField.Description) },
             scrollState = scrollState,
             title = {
                 Text(

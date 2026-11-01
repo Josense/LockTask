@@ -1,7 +1,9 @@
 package com.josense.locktask.ui.page.task_detail
 
 import androidx.activity.compose.setContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -9,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.SavedStateHandle
@@ -26,6 +29,28 @@ import org.junit.Test
 class TaskDetailEditingUiTest {
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
+
+    @Test
+    fun blankAreaBelowShortDescriptionStartsDescriptionEditing() {
+        val repository = TaskDetailViewModelTest.Repository()
+        repository.task.value = repository.task.value.copy(content = "Short description")
+        val model = TaskDetailViewModel(repository, SavedStateHandle(mapOf("taskId" to 1)))
+        try {
+            compose.runOnUiThread {
+                compose.activity.setContent {
+                    LockTaskTheme { TaskDetailRoot(model, onBackClick = {}) }
+                }
+            }
+            compose.onNodeWithTag("detail_content").performTouchInput {
+                click(Offset(centerX, height * 0.8f))
+            }
+            compose.onNodeWithTag("detail_edit_description").assertIsFocused()
+            awaitKeyboard(visible = true)
+            compose.runOnIdle { assertEquals(TaskDetailField.Description, model.uiState.value.edit?.field) }
+        } finally {
+            model.viewModelScope.cancel()
+        }
+    }
 
     @Test
     fun backAfterCorrectingBlankTitleSavesWithoutAnExtraBack() {
