@@ -23,11 +23,18 @@ class CreateTaskViewModel(private val taskRepository: TaskRepository) : ViewMode
                     it.copy(title = action.title, submission = Submission.Idle)
                 }
             }
+            is CreateTaskAction.DescriptionChanged -> mutableState.update {
+                if (it.submission == Submission.Saving || it.submission is Submission.Succeeded) {
+                    it
+                } else {
+                    it.copy(description = action.description, submission = Submission.Idle)
+                }
+            }
             CreateTaskAction.ToggleLockNotify -> mutableState.update {
                 if (it.submission == Submission.Saving || it.submission is Submission.Succeeded) {
                     it
                 } else {
-                    it.copy(needLockNotify = !it.needLockNotify)
+                    it.copy(needLockNotify = it.needLockNotify.not())
                 }
             }
             CreateTaskAction.Submit -> submit()
@@ -45,7 +52,7 @@ class CreateTaskViewModel(private val taskRepository: TaskRepository) : ViewMode
         viewModelScope.launch {
             try {
                 val taskId = taskRepository.insertTask(
-                    Task(title = input.title, needLockNotify = input.needLockNotify),
+                    Task(title = input.title, content = input.description, needLockNotify = input.needLockNotify),
                 )
                 mutableState.update { it.copy(submission = Submission.Succeeded(taskId)) }
             } catch (cancelled: CancellationException) {

@@ -43,4 +43,5 @@
     <string name="task_detail_save_failed">保存失败，请重试</string>
     <string name="task_detail_more">更多操作</string>
     <string name="task_action_failed">操作失败，请重试</string>
+    <string name="add_task_description_placeholder">添加描述（可选）</string>
 </resources>

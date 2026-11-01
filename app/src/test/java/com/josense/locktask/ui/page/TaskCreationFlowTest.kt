@@ -74,6 +74,7 @@ class TaskCreationFlowTest {
         val nextStore = ViewModelStore()
         nextStore.put("create", next)
         assertEquals("", next.state.value.title)
+        assertEquals("", next.state.value.description)
         assertEquals(Submission.Idle, next.state.value.submission)
         assertTrue(next.state.value.needLockNotify)
         nextStore.clear()
@@ -108,6 +109,26 @@ class TaskCreationFlowTest {
         create.onAction(CreateTaskAction.Submit)
         runCurrent()
         assertEquals(Submission.Succeeded(8), create.state.value.submission)
+    }
+
+    @Test
+    fun `description is optional and multiline draft is frozen during saving`() = runTest(dispatcher) {
+        create.onAction(CreateTaskAction.DescriptionChanged("First line\nSecond line"))
+        create.onAction(CreateTaskAction.Submit)
+        create.onAction(CreateTaskAction.DescriptionChanged("Should be ignored"))
+        runCurrent()
+        assertEquals("First line\nSecond line", repository.inserted?.content)
+        assertEquals("First line\nSecond line", create.state.value.description)
+        repository.result.completeExceptionally(IllegalStateException("Write failed"))
+        runCurrent()
+        assertEquals(Submission.Failed, create.state.value.submission)
+        assertEquals("First line\nSecond line", create.state.value.description)
+        create.onAction(CreateTaskAction.DescriptionChanged(""))
+        repository.result = CompletableDeferred(9)
+        create.onAction(CreateTaskAction.Submit)
+        runCurrent()
+        assertEquals("", repository.inserted?.content)
+        assertEquals(Submission.Succeeded(9), create.state.value.submission)
     }
 
     @Test

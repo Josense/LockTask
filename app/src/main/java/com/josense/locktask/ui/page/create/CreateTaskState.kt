@@ -2,6 +2,7 @@ package com.josense.locktask.ui.page.create
 
 data class CreateTaskState(
     val title: String = "",
+    val description: String = "",
     val needLockNotify: Boolean = true,
     val submission: Submission = Submission.Idle,
 )

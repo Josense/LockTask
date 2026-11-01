@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,8 +16,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,11 +63,7 @@ fun CreateTaskSheet(onDismiss: () -> Unit, onCreated: (Int) -> Unit) {
         dismissEnabled = state.submission != Submission.Saving && state.submission !is Submission.Succeeded,
         title = stringResource(R.string.create_task),
     ) {
-        TaskTitleInputField(
-            currentInput = state.title,
-            updateInput = { viewModel.onAction(CreateTaskAction.TitleChanged(it)) },
-            modifier = initialFocusModifier,
-        )
+        CreateTaskInputs(state, initialFocusModifier, viewModel::onAction)
         if (state.submission == Submission.Failed) {
             Text(
                 text = stringResource(R.string.create_task_failed),
@@ -76,13 +83,73 @@ fun CreateTaskSheet(onDismiss: () -> Unit, onCreated: (Int) -> Unit) {
 }
 
 @Composable
-fun TaskTitleInputField(currentInput: String, updateInput: (String) -> Unit, modifier: Modifier = Modifier) {
+internal fun CreateTaskInputs(
+    state: CreateTaskState,
+    initialFocusModifier: Modifier,
+    onAction: (CreateTaskAction) -> Unit,
+) {
+    val descriptionFocus = remember { FocusRequester() }
+    val readOnly = state.submission == Submission.Saving || state.submission is Submission.Succeeded
+    TaskTitleInputField(
+        currentInput = state.title,
+        updateInput = { onAction(CreateTaskAction.TitleChanged(it)) },
+        modifier = initialFocusModifier.testTag("create_task_title"),
+        readOnly = readOnly,
+        onNext = { descriptionFocus.requestFocus() },
+    )
+    BasicTextField(
+        value = state.description,
+        onValueChange = { onAction(CreateTaskAction.DescriptionChanged(it)) },
+        readOnly = readOnly,
+        minLines = 2,
+        maxLines = 5,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+        modifier = Modifier.focusRequester(descriptionFocus)
+            .testTag("create_task_description")
+            .fillMaxWidth().padding(TextFieldPadding),
+        decorationBox = { innerTextField ->
+            Box {
+                if (state.description.isEmpty()) {
+                    Text(
+                        stringResource(R.string.add_task_description_placeholder),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                innerTextField()
+            }
+        },
+    )
+}
+
+@Composable
+fun TaskTitleInputField(
+    currentInput: String,
+    updateInput: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    readOnly: Boolean = false,
+    onNext: () -> Unit = {},
+) {
     BasicTextField(
         value = currentInput,
         onValueChange = updateInput,
+        readOnly = readOnly,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardActions = KeyboardActions(onNext = { onNext() }),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
         modifier = modifier
+            .onPreviewKeyEvent {
+                if (it.key == Key.Enter || it.key == Key.NumPadEnter) {
+                    if (it.type == KeyEventType.KeyUp) onNext()
+                    true
+                } else {
+                    false
+                }
+            }
             .fillMaxWidth()
             .padding(TextFieldPadding),
         decorationBox = { innerTextField ->
