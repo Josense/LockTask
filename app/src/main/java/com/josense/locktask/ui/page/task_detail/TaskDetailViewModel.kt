@@ -10,6 +10,8 @@ import java.util.Date
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -20,15 +22,12 @@ class TaskDetailViewModel(
     private val taskDetailRoute = savedStateHandle.toRoute<TaskDetail>()
 
     private val mutableUiState = MutableStateFlow(TaskDetailState())
-    val uiState = mutableUiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            taskRepository.getTaskById(taskDetailRoute.taskId)
-                .collect { task ->
-                    mutableUiState.update { it.copy(task = task) }
-                }
-        }
+    val uiState = mutableUiState.asStateFlow().also {
+        taskRepository.getTaskById(taskDetailRoute.taskId)
+            .onEach { task ->
+                mutableUiState.update { it.copy(task = task) }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun onAction(action: TaskDetailAction) {
