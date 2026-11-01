@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <!-- Preserve the outlined icon's board, pin and unread-dot positions. -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M160,160H524Q520,180 520,200Q520,283 578.5,341.5Q637,400 720,400Q762,400 800,383V720Q800,753 776.5,776.5Q753,800 720,800H480V590L420,484V440H480V280H80V240Q80,207 103.5,183.5Q127,160 160,160Z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M260,880L220,840V680H80V600L140,494V400H80V320H440V400H380V494L440,600V680H300V840Z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M635,285Q600,250 600,200T635,115Q670,80 720,80T805,115Q840,150 840,200T805,285Q770,320 720,320T635,285Z" />
+</vector>
