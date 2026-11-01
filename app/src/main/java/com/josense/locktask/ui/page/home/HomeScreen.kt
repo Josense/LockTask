@@ -1,5 +1,8 @@
 package com.josense.locktask.ui.page.home
 
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.josense.locktask.R
@@ -37,6 +41,9 @@ import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.components.LockNotifyStatus
 import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
+
+private const val TASK_HIGHLIGHT_DURATION_MILLIS = 1_500L
+
 
 @Composable
 fun HomeScreen(
@@ -84,9 +91,17 @@ fun HomeScreen(
             }
         }
     }
+    var highlightedId by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(highlightedId) {
+        if (highlightedId != null) {
+            delay(TASK_HIGHLIGHT_DURATION_MILLIS.milliseconds)
+            highlightedId = null
+        }
+    }
     LaunchedEffect(taskId, targetIndex) {
         if (taskId != null && targetIndex >= 0) {
             listState.animateScrollToItem(targetIndex)
+            highlightedId = taskId
             onAction(HomeAction.AnchorHandled(taskId))
         }
     }
@@ -101,27 +116,29 @@ fun HomeScreen(
         is HomeListState.Content -> LazyColumn(
             state = listState,
             modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 88.dp,
+            ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(list.tasks, key = { task -> task.id }) { task ->
                 RemovingTaskItem(visible = !(exiting && task.id in removingIds)) {
                     TaskItem(
                         task = task,
+                        highlighted = task.id == highlightedId,
                         enabled = task.id !in removingIds,
                         nowMillis = nowMillis,
                         onTaskClick = { onAction(HomeAction.TaskClick(it)) },
                     )
                 }
             }
-            item(key = "home_list_footer") {
-                Text(
-                    text = stringResource(R.string.home_list_end),
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 88.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
+            val taskCount = list.tasks.count { it.id !in removingIds }
+            if (taskCount > 0) {
+                item(key = "home_list_footer") {
+                    TaskListFooter(taskCount = taskCount)
+                }
             }
         }
     }
@@ -156,20 +173,34 @@ fun EmptyHomeScreen(modifier: Modifier = Modifier) {
 fun TaskItem(
     task: Task,
     enabled: Boolean = true,
+    highlighted: Boolean = false,
     nowMillis: Long = System.currentTimeMillis(),
     onTaskClick: (Task) -> Unit = {},
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .clickable(enabled = enabled) { onTaskClick(task) },
-        verticalAlignment = Alignment.CenterVertically,
+            .clip(MaterialTheme.shapes.large)
+            .background(
+                if (highlighted) MaterialTheme.colorScheme.secondaryContainer
+                else Color.Transparent
+            )
+            .clickable(enabled = enabled) { onTaskClick(task) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
     ) {
         LockNotifyStatus(needLockNotify = task.needLockNotify)
-        Text(
-            text = task.title,
-            modifier = Modifier.weight(1f).padding(vertical = 8.dp, horizontal = 4.dp),
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        TaskCreatedTime(createdAt = task.createAt, nowMillis = nowMillis)
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = task.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            TaskCreatedTime(createdAt = task.createAt, nowMillis = nowMillis)
+        }
     }
 }

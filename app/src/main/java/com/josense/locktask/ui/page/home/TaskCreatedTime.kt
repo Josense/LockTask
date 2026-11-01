@@ -36,7 +36,7 @@ internal fun TaskCreatedTime(createdAt: Date, nowMillis: Long) {
     }
     Text(
         text = text,
-        textAlign = TextAlign.End,
+        textAlign = TextAlign.Start,
         maxLines = 1,
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,

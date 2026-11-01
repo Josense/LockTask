@@ -9,7 +9,6 @@
     <string name="lock_notify_disabled">锁屏提醒已关闭</string>
     <string name="create_task">创建</string>
     <string name="no_not_completed_task">没有待完成的任务</string>
-    <string name="home_list_end">已经到底了</string>
     <string name="complete">完成</string>
     <string name="delete">删除</string>
     <string name="back">返回</string>
@@ -27,4 +26,20 @@
     <string name="undo">撤销</string>
     <string name="task_removed">已移除“%1$s”</string>
     <string name="task_created_yesterday">昨天 %1$s</string>
+    <string name="task_notification_channel">常驻任务</string>
+    <string name="notification_permission_description">任务常驻锁屏需要开启通知权限</string>
+    <string name="notification_channel_disabled_description">任务常驻锁屏已关闭</string>
+    <string name="notification_app_disabled_description">应用通知已关闭</string>
+    <string name="notification_enable_action">开启通知权限</string>
+    <string name="notification_settings_action">前往设置</string>
+    <!-- Stable platform identifiers shared by notification publishing and UI. -->
+    <string name="notification_channel_id" translatable="false">persistent_tasks</string>
+    <string name="notification_uri_scheme" translatable="false">locktask</string>
+    <string name="notification_uri_host" translatable="false">task</string>
+    <string name="notification_uri_key" translatable="false">notification</string>
+    <string name="home_list_summary">已显示全部 %1$d 项任务</string>
+    <string name="task_detail_no_description">暂无描述</string>
+    <string name="task_detail_lock_notify">常驻锁屏</string>
+    <string name="task_detail_save_failed">保存失败，请重试</string>
+    <string name="task_detail_more">更多操作</string>
 </resources>

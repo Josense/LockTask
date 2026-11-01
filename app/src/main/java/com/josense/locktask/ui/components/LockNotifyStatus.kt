@@ -1,6 +1,5 @@
 package com.josense.locktask.ui.components
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -13,13 +12,17 @@ import com.josense.locktask.R
 
 @Composable
 fun LockNotifyStatus(needLockNotify: Boolean) {
+    val colors = MaterialTheme.colorScheme
     Icon(
-        painter = painterResource(R.drawable.ic_pinboard_unread),
-        contentDescription = stringResource(
-            if (needLockNotify) R.string.lock_notify_enabled else R.string.lock_notify_disabled
+        painter = painterResource(
+            if (needLockNotify) R.drawable.ic_pinboard_unread_filled
+            else R.drawable.ic_pinboard_unread
         ),
-        modifier = Modifier.padding(12.dp).size(24.dp),
-        tint = if (needLockNotify) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
+        contentDescription = stringResource(
+            if (needLockNotify) R.string.lock_notify_enabled
+            else R.string.lock_notify_disabled
+        ),
+        modifier = Modifier.size(24.dp),
+        tint = if (needLockNotify) colors.primary else colors.outline,
     )
 }
