@@ -1,13 +1,8 @@
 package com.josense.locktask.ui.page.task_detail
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.outlined.Done
@@ -26,13 +21,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.josense.locktask.R
-import com.josense.locktask.domain.model.Task
-import java.text.DateFormat
+import com.josense.locktask.ui.components.LockNotifyToggleBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -116,46 +108,3 @@ fun TaskDetailRoot(
     }
 }
 
-@Composable
-private fun TaskDetailContent(task: Task, modifier: Modifier = Modifier) {
-    val locale = LocalConfiguration.current.locales[0]
-    val formatter = remember(locale) {
-        DateFormat.getDateTimeInstance(
-            DateFormat.MEDIUM,
-            DateFormat.SHORT,
-            locale,
-        )
-    }
-    SelectionContainer {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = formatter.format(task.updateAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.headlineSmall,
-                )
-            }
-            Text(
-                text = task.content.ifBlank {
-                    stringResource(R.string.task_detail_no_description)
-                },
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (task.content.isBlank()) {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-            )
-        }
-    }
-}

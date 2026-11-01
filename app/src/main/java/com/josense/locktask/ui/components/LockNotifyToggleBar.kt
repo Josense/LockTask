@@ -1,4 +1,4 @@
-package com.josense.locktask.ui.page.task_detail
+package com.josense.locktask.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Arrangement
