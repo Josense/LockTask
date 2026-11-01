@@ -122,6 +122,42 @@ class TaskDetailViewModelTest {
         }
     }
 
+    @Test
+    fun editValidatesTitleRetainsFailedDraftAndPreservesOtherFields() = runBlocking {
+        val repository = Repository()
+        val model = TaskDetailViewModel(repository, SavedStateHandle(mapOf("taskId" to 1)))
+        try {
+            withTimeout(5000) { model.uiState.first { it.task != null } }
+            withContext(Dispatchers.Main) {
+                model.onAction(TaskDetailAction.StartEditing(TaskDetailField.Title))
+                model.onAction(TaskDetailAction.TitleChanged(" "))
+                model.onAction(TaskDetailAction.FinishEditing)
+            }
+            assertTrue(model.uiState.value.edit!!.titleError)
+            assertEquals("Title", repository.task.value.title)
+            repository.fail = true
+            withContext(Dispatchers.Main) {
+                model.onAction(TaskDetailAction.TitleChanged("Edited"))
+                model.onAction(TaskDetailAction.DescriptionChanged("First\nSecond"))
+                model.onAction(TaskDetailAction.FinishEditing)
+            }
+            withTimeout(5000) { model.uiState.first { it.isSaving.not() } }
+            assertTrue(model.uiState.value.saveFailed)
+            assertEquals("First\nSecond", model.uiState.value.edit!!.description)
+            repository.fail = false
+            repository.task.value = repository.task.value.copy(needLockNotify = false)
+            withContext(Dispatchers.Main) { model.onAction(TaskDetailAction.FinishEditing) }
+            withTimeout(5000) { model.uiState.first { it.isSaving.not() && it.edit == null } }
+            assertEquals("Edited", repository.task.value.title)
+            assertEquals("First\nSecond", repository.task.value.content)
+            assertFalse(repository.task.value.needLockNotify)
+            assertEquals(Date(0), repository.task.value.createAt)
+            assertFalse(model.uiState.value.isFinished)
+        } finally {
+            model.viewModelScope.cancel()
+        }
+    }
+
     internal class Repository : TaskRepository {
         val task = MutableStateFlow(
             Task(1, "Title", createAt = Date(0), updateAt = Date(0)),

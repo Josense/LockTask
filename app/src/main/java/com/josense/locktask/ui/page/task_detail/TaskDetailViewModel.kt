@@ -4,12 +4,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.repository.TaskRepository
 import com.josense.locktask.ui.navigation.TaskDetail
 import java.util.Date
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -29,38 +31,81 @@ class TaskDetailViewModel(private val taskRepository: TaskRepository, savedState
     }
 
     fun onAction(action: TaskDetailAction) {
-        if (action == TaskDetailAction.DismissSaveError) {
-            mutableUiState.update { it.copy(saveFailed = false) }
-            return
-        }
-        if (mutableUiState.value.isSaving) return
-        val task = mutableUiState.value.task ?: return
-        mutableUiState.update {
-            it.copy(isSaving = true, saveFailed = false)
-        }
-        viewModelScope.launch {
-            try {
-                when (action) {
-                    TaskDetailAction.DismissSaveError -> Unit
-                    is TaskDetailAction.SetLockNotify -> {
-                        if (task.isDeleted.not()) {
-                            taskRepository.updateTask(
-                                task.copy(
-                                    needLockNotify = action.enabled,
-                                    updateAt = Date(),
-                                ),
-                            )
-                        }
-                    }
-                    TaskDetailAction.Delete -> {
-                        taskRepository.deleteTaskSoftly(task)
-                        mutableUiState.update { it.copy(isFinished = true) }
-                    }
-                    TaskDetailAction.Complete -> {
-                        taskRepository.completeTask(task)
-                        mutableUiState.update { it.copy(isFinished = true) }
+        val state = mutableUiState.value
+        if (state.isSaving && action != TaskDetailAction.DismissSaveError) return
+        when (action) {
+            TaskDetailAction.DismissSaveError -> mutableUiState.update { it.copy(saveFailed = false) }
+            is TaskDetailAction.StartEditing -> {
+                val task = state.task ?: return
+                if (task.isDeleted.not()) {
+                    mutableUiState.update {
+                        it.copy(
+                            edit = it.edit?.copy(field = action.field) ?: TaskDetailEdit(
+                                action.field,
+                                task.title,
+                                task.content,
+                            ),
+                        )
                     }
                 }
+            }
+            is TaskDetailAction.TitleChanged -> mutableUiState.update {
+                it.copy(edit = it.edit?.copy(title = action.title, titleError = false))
+            }
+            is TaskDetailAction.DescriptionChanged -> mutableUiState.update {
+                it.copy(edit = it.edit?.copy(description = action.description))
+            }
+            TaskDetailAction.FinishEditing -> saveEdit()
+            is TaskDetailAction.SetLockNotify -> saveTaskAction { task ->
+                if (task.isDeleted.not()) {
+                    taskRepository.updateTask(task.copy(needLockNotify = action.enabled, updateAt = Date()))
+                }
+            }
+            TaskDetailAction.Delete -> saveTaskAction(finishDetail = true) { task ->
+                taskRepository.deleteTaskSoftly(task)
+            }
+            TaskDetailAction.Complete -> saveTaskAction(finishDetail = true) { task ->
+                taskRepository.completeTask(task)
+            }
+        }
+    }
+
+    private fun saveTaskAction(finishDetail: Boolean = false, save: suspend (Task) -> Unit) {
+        val state = mutableUiState.value
+        if (state.edit != null) return
+        val task = state.task ?: return
+        launchSave {
+            save(task)
+            if (finishDetail) mutableUiState.update { it.copy(isFinished = true) }
+        }
+    }
+
+    private fun saveEdit() {
+        val edit = mutableUiState.value.edit ?: return
+        if (edit.title.isBlank()) {
+            mutableUiState.update { it.copy(edit = edit.copy(titleError = true)) }
+            return
+        }
+        launchSave {
+            val current = taskRepository.getTaskById(taskDetailRoute.taskId).first()
+                ?: error("Task no longer exists")
+            check(current.isDeleted.not())
+            val changed = current.title != edit.title || current.content != edit.description
+            val saved = if (changed) {
+                current.copy(title = edit.title, content = edit.description, updateAt = Date())
+            } else {
+                current
+            }
+            if (changed) taskRepository.updateTask(saved)
+            mutableUiState.update { it.copy(task = saved, edit = null) }
+        }
+    }
+
+    private fun launchSave(save: suspend () -> Unit) {
+        mutableUiState.update { it.copy(isSaving = true, saveFailed = false) }
+        viewModelScope.launch {
+            try {
+                save()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
