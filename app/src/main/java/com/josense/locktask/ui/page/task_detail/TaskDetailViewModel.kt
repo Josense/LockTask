@@ -54,6 +54,10 @@ class TaskDetailViewModel(
                             )
                         }
                     }
+                    TaskDetailAction.Delete -> {
+                        taskRepository.deleteTaskSoftly(task)
+                        mutableUiState.update { it.copy(isFinished = true) }
+                    }
                     TaskDetailAction.Complete -> {
                         taskRepository.completeTask(task)
                         mutableUiState.update { it.copy(isFinished = true) }

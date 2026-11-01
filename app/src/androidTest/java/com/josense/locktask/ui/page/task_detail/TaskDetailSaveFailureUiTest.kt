@@ -15,6 +15,7 @@ import com.josense.locktask.debug.FailingDetailRepository
 import com.josense.locktask.ui.MainActivity
 import com.josense.locktask.ui.theme.LockTaskTheme
 import kotlinx.coroutines.cancel
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +58,32 @@ class TaskDetailSaveFailureUiTest {
         } finally {
             model.viewModelScope.cancel()
             if (failure.armed.value) failure.toggle()
+        }
+    }
+    @Test
+    fun deleteMenuSoftDeletesAndReturns() {
+        val repository = TaskDetailViewModelTest.Repository()
+        val model = TaskDetailViewModel(
+            repository, SavedStateHandle(mapOf("taskId" to 1)),
+        )
+        var returned = false
+        try {
+            compose.runOnUiThread {
+                compose.activity.setContent {
+                    LockTaskTheme {
+                        TaskDetailRoot(model, onBackClick = { returned = true })
+                    }
+                }
+            }
+            compose.onNodeWithContentDescription("更多操作").performClick()
+            compose.onNodeWithText("删除").assertIsDisplayed().performClick()
+            compose.waitForIdle()
+            compose.runOnIdle {
+                assertTrue(repository.task.value.isDeleted)
+                assertTrue(returned)
+            }
+        } finally {
+            model.viewModelScope.cancel()
         }
     }
 }

@@ -4,4 +4,4 @@ import androidx.compose.runtime.Composable
 
 @Suppress("UNUSED_PARAMETER")
 @Composable
-internal fun DebugSaveFailureMenu(enabled: Boolean) = Unit
+internal fun DebugSaveFailureMenuItem(onDismiss: () -> Unit) = Unit

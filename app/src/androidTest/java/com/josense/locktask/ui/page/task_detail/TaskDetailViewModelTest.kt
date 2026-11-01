@@ -73,6 +73,7 @@ class TaskDetailViewModelTest {
         val actions = listOf(
             TaskDetailAction.SetLockNotify(false),
             TaskDetailAction.Complete,
+            TaskDetailAction.Delete,
         )
         for (action in actions) {
             val repository = Repository()
@@ -106,6 +107,10 @@ class TaskDetailViewModelTest {
                 }
                 assertFalse(model.uiState.value.saveFailed)
                 assertNotEquals(original, repository.task.value)
+                if (action == TaskDetailAction.Delete) {
+                    assertTrue(repository.task.value.isDeleted)
+                    assertTrue(model.uiState.value.isFinished)
+                }
             } finally {
                 model.viewModelScope.cancel()
             }

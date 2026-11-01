@@ -75,7 +75,13 @@ fun TaskDetailRoot(
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
-                        DebugSaveFailureMenu(state.isSaving.not())
+                        TaskDetailMoreMenu(
+                            enabled = state.isSaving.not() &&
+                                task.isDeleted.not(),
+                            onDelete = {
+                                viewModel.onAction(TaskDetailAction.Delete)
+                            },
+                        )
                     }
                 },
             )

@@ -34,4 +34,8 @@ internal class FailingDetailRepository(
         failure.check()
         delegate.completeTask(task, isCompleted)
     }
+    override suspend fun deleteTaskSoftly(task: Task) {
+        failure.check()
+        delegate.deleteTaskSoftly(task)
+    }
 }
