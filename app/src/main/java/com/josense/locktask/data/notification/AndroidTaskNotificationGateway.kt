@@ -121,6 +121,7 @@ class AndroidTaskNotificationGateway(private val context: Context) :
         val built =
             NotificationCompat.Builder(context, channelId)
                 .setSmallIcon(R.mipmap.ic_launcher_monochrome)
+                .setShowWhen(false)
                 .setContentTitle(notification.title)
                 .setContentText(notification.content)
                 .setStyle(
