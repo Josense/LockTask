@@ -7,7 +7,9 @@
 ## Kotlin Style
 - Use `variable.not()` instead of the unary `!` operator for Boolean negation.
 
-## Git Commit Etiquette
+## Git Commit & Workflow Etiquette
+- **Branch Naming Convention:** All branches must follow the `type/module/feature_description` format, where `type` aligns with the commit prefix (e.g., `feat`, `fix`), `module` targets the functional or page area, and `feature_description` is a snake_case summary.
+- **Git Worktree Workflow:** Always create worktrees in the parent directory of the current repository, keeping them parallel to the main repository directory (e.g., `git worktree add ../<branch-name> <branch-name>`).
 - **Commit Message Formatting:** Every commit must start with a valid prefix followed by a single space (e.g., `feat: `, `fix: `, `refactor: `, `docs: `, `style: `, `test: `).
 - Commit messages should describe the behavior that changed, not the implementation details that changed.
 - When the reason for the change is not obvious from the title, include a commit body that explains why the change was required.
