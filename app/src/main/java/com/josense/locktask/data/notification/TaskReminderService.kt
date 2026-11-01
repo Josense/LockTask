@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -35,6 +36,10 @@ class TaskReminderService : Service() {
             )
         }
         val launchIntent = requireNotNull(packageManager.getLaunchIntentForPackage(packageName)).apply {
+            data = Uri.Builder()
+                .scheme(getString(R.string.notification_uri_scheme))
+                .authority(getString(R.string.notification_create_uri_host))
+                .build()
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)

@@ -30,7 +30,13 @@ class NotificationDelegate(
     private val repository: TaskRepository,
     private val reconcile: () -> Unit,
 ) {
-    internal data class Target(val requestId: Long, val taskId: Int)
+    internal sealed interface Target {
+        val requestId: Long
+
+        data class Task(override val requestId: Long, val taskId: Int) : Target
+
+        data class Create(override val requestId: Long) : Target
+    }
 
     internal data class State(
         val target: Target? = null,
@@ -78,6 +84,8 @@ class NotificationDelegate(
             activity.savedStateRegistry.consumeRestoredStateForKey(SAVED_STATE)
         if (restored == null) {
             acceptIntent(activity.intent)
+        } else if (restored.getBoolean(CREATE_TASK_KEY)) {
+            acceptCreate()
         } else {
             restored
                 .getInt(TARGET_TASK_KEY, 0)
@@ -86,7 +94,11 @@ class NotificationDelegate(
         }
         activity.savedStateRegistry.registerSavedStateProvider(SAVED_STATE) {
             Bundle().apply {
-                state.target?.let { putInt(TARGET_TASK_KEY, it.taskId) }
+                when (val target = state.target) {
+                    is Target.Task -> putInt(TARGET_TASK_KEY, target.taskId)
+                    is Target.Create -> putBoolean(CREATE_TASK_KEY, true)
+                    null -> Unit
+                }
             }
         }
         activity.addOnNewIntentListener { acceptIntent(it) }
@@ -101,18 +113,20 @@ class NotificationDelegate(
 
     private fun acceptIntent(intent: Intent) {
         val uri = intent.data ?: return
-        if (
-            uri.scheme !=
-            activity.getString(R.string.notification_uri_scheme) ||
-            uri.host != activity.getString(R.string.notification_uri_host)
-        ) {
-            return
+        if (uri.scheme != activity.getString(R.string.notification_uri_scheme)) return
+        when (uri.host) {
+            activity.getString(R.string.notification_uri_host) ->
+                uri.lastPathSegment?.toIntOrNull()?.takeIf { it > 0 }?.let(::acceptTask)
+            activity.getString(R.string.notification_create_uri_host) -> acceptCreate()
         }
-        uri.lastPathSegment?.toIntOrNull()?.takeIf { it > 0 }?.let(::acceptTask)
     }
 
     private fun acceptTask(taskId: Int) {
-        state = state.copy(target = Target(System.nanoTime(), taskId))
+        state = state.copy(target = Target.Task(System.nanoTime(), taskId), backgroundGuideVisible = false)
+    }
+
+    private fun acceptCreate() {
+        state = state.copy(target = Target.Create(System.nanoTime()), backgroundGuideVisible = false)
     }
 
     internal fun onAction(action: Action) {
@@ -222,6 +236,7 @@ class NotificationDelegate(
     private companion object {
         const val BACKGROUND_NOTICE_DISMISSED_KEY = "background_notice_dismissed"
         const val SAVED_STATE = "task_notification_delegate"
+        const val CREATE_TASK_KEY = "create_task"
         const val TARGET_TASK_KEY = "task"
         const val PERMISSION_ASKED_KEY = "notification_permission_asked"
     }

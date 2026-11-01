@@ -15,21 +15,19 @@ fun NotificationDelegate.NavigationEffect(returnHome: () -> Unit) {
 }
 
 @Composable
-fun NotificationDelegate.HomeEffect(home: HomeState, dispatch: (HomeAction) -> Unit) {
+fun NotificationDelegate.HomeEffect(home: HomeState, dispatch: (HomeAction) -> Unit, onCreateRequested: () -> Unit) {
     val target = state.target
     LaunchedEffect(target, home.list) {
-        if (target == null || home.list == HomeListState.Loading) {
-            return@LaunchedEffect
-        }
-        val tasks = (home.list as? HomeListState.Content)?.tasks.orEmpty()
-        if (
-            tasks.any {
-                it.id == target.taskId &&
-                    it.isCompleted.not() &&
-                    it.isDeleted.not()
+        when (target) {
+            is NotificationDelegate.Target.Create -> onCreateRequested()
+            is NotificationDelegate.Target.Task -> {
+                if (home.list == HomeListState.Loading) return@LaunchedEffect
+                val tasks = (home.list as? HomeListState.Content)?.tasks.orEmpty()
+                if (tasks.any { it.id == target.taskId && it.isCompleted.not() && it.isDeleted.not() }) {
+                    dispatch(HomeAction.AnchorTask(target.taskId))
+                }
             }
-        ) {
-            dispatch(HomeAction.AnchorTask(target.taskId))
+            null -> return@LaunchedEffect
         }
         onAction(NotificationDelegate.Action.Consume(target.requestId))
     }

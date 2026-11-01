@@ -51,8 +51,8 @@
     <string name="notification_dismiss_uri_scheme" translatable="false">locktask-dismiss</string>
     <string name="notification_dismiss_uri_host" translatable="false">notification</string>
     <string name="reminder_service_channel">提醒运行状态</string>
-    <string name="reminder_service_title">锁屏提醒已开启</string>
-    <string name="reminder_service_description">正在保留任务提醒，点击查看任务</string>
+    <string name="reminder_service_title">快速创建任务</string>
+    <string name="reminder_service_description">点击记录新任务 · 锁屏提醒运行中</string>
     <string name="background_reminder_title">允许后台运行，保留任务提醒</string>
     <string name="background_reminder_description">部分系统会在划掉应用时清除通知。请在系统设置中允许 LockTask 在后台运行。</string>
     <string name="background_reminder_settings">后台运行设置</string>
@@ -67,4 +67,5 @@
     <string name="settings_notifications">通知设置</string>
     <string name="settings_notifications_enabled">任务通知已开启</string>
     <string name="settings_background_description">查看后台运行授权说明，减少任务通知被系统清理</string>
+    <string name="notification_create_uri_host" translatable="false">create</string>
 </resources>

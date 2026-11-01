@@ -46,7 +46,8 @@ fun HomePageRoot(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val homeState by viewModel.state.collectAsStateWithLifecycle()
-    notifications?.HomeEffect(homeState, viewModel::onAction)
+    var showAddTaskSheet by remember { mutableStateOf(false) }
+    notifications?.HomeEffect(homeState, viewModel::onAction) { showAddTaskSheet = true }
     val snackbarHostState = remember { SnackbarHostState() }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val removedMessage = stringResource(R.string.task_removed)
@@ -71,7 +72,6 @@ fun HomePageRoot(
             }
         }
     }
-    var showAddTaskSheet by remember { mutableStateOf(false) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
