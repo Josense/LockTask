@@ -16,6 +16,11 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.josense.locktask.ui.notification.NotificationDelegate
+import com.josense.locktask.ui.notification.HomeEffect
+import com.josense.locktask.ui.notification.AccessNotice
+import com.josense.locktask.ui.notification.taskCreated
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.collectLatest
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -37,9 +42,12 @@ import com.josense.locktask.ui.page.create.CreateTaskSheet
 @Composable
 fun HomePageRoot(
     onTaskClick: (Task) -> Unit,
+    notifications: NotificationDelegate? = null,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
 
+    val homeState by viewModel.state.collectAsStateWithLifecycle()
+    notifications?.HomeEffect(homeState, viewModel::onAction)
     val snackbarHostState = remember { SnackbarHostState() }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val removedMessage = stringResource(R.string.task_removed)
@@ -83,11 +91,21 @@ fun HomePageRoot(
             }
         }
     ) { innerPadding ->
-        HomeScreen(Modifier.padding(innerPadding), onTaskClick, homeViewModel = viewModel)
+        Column(
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            notifications?.AccessNotice(homeState)
+            HomeScreen(
+                Modifier.weight(1f),
+                onTaskClick,
+                homeViewModel = viewModel,
+            )
+        }
         if (showAddTaskSheet) {
             CreateTaskSheet(
                 onDismiss = { showAddTaskSheet = false },
                 onCreated = { taskId ->
+                    notifications?.taskCreated(taskId)
                     viewModel.onAction(HomeAction.AnchorTask(taskId))
                     showAddTaskSheet = false
                 },

@@ -1,5 +1,7 @@
 package com.josense.locktask.ui.page.home
 
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +39,9 @@ import com.josense.locktask.domain.model.Task
 import com.josense.locktask.ui.components.LockNotifyStatus
 import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
+
+private const val TASK_HIGHLIGHT_DURATION_MILLIS = 1_500L
+
 
 @Composable
 fun HomeScreen(
@@ -84,9 +89,17 @@ fun HomeScreen(
             }
         }
     }
+    var highlightedId by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(highlightedId) {
+        if (highlightedId != null) {
+            delay(TASK_HIGHLIGHT_DURATION_MILLIS.milliseconds)
+            highlightedId = null
+        }
+    }
     LaunchedEffect(taskId, targetIndex) {
         if (taskId != null && targetIndex >= 0) {
             listState.animateScrollToItem(targetIndex)
+            highlightedId = taskId
             onAction(HomeAction.AnchorHandled(taskId))
         }
     }
@@ -108,6 +121,7 @@ fun HomeScreen(
                 RemovingTaskItem(visible = !(exiting && task.id in removingIds)) {
                     TaskItem(
                         task = task,
+                        highlighted = task.id == highlightedId,
                         enabled = task.id !in removingIds,
                         nowMillis = nowMillis,
                         onTaskClick = { onAction(HomeAction.TaskClick(it)) },
@@ -156,11 +170,16 @@ fun EmptyHomeScreen(modifier: Modifier = Modifier) {
 fun TaskItem(
     task: Task,
     enabled: Boolean = true,
+    highlighted: Boolean = false,
     nowMillis: Long = System.currentTimeMillis(),
     onTaskClick: (Task) -> Unit = {},
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
+            .background(
+                if (highlighted) MaterialTheme.colorScheme.secondaryContainer
+                else Color.Transparent
+            )
             .clickable(enabled = enabled) { onTaskClick(task) },
         verticalAlignment = Alignment.CenterVertically,
     ) {

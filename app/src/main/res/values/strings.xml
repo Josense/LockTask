@@ -27,4 +27,11 @@
     <string name="undo">撤销</string>
     <string name="task_removed">已移除“%1$s”</string>
     <string name="task_created_yesterday">昨天 %1$s</string>
+    <string name="task_notification_channel">常驻任务</string>
+    <string name="notification_access_action">任务已保存，通知尚未开启 · 开启通知</string>
+    <!-- Stable platform identifiers shared by notification publishing and UI. -->
+    <string name="notification_channel_id" translatable="false">persistent_tasks</string>
+    <string name="notification_uri_scheme" translatable="false">locktask</string>
+    <string name="notification_uri_host" translatable="false">task</string>
+    <string name="notification_uri_key" translatable="false">notification</string>
 </resources>

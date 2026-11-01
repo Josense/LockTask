@@ -8,15 +8,18 @@ import androidx.activity.SystemBarStyle
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.josense.locktask.ui.navigation.HomeNavGraph
+import com.josense.locktask.ui.notification.NotificationDelegate
 import com.josense.locktask.ui.theme.LockTaskTheme
+import org.koin.android.ext.android.getKoin
+import org.koin.core.parameter.parametersOf
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val notifications: NotificationDelegate =
+            getKoin().get { parametersOf(this@MainActivity) }
         installSplashScreen()
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
@@ -25,7 +28,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             LockTaskTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    HomeNavGraph()
+                    HomeNavGraph(notifications)
                 }
             }
         }
