@@ -1,5 +1,6 @@
 package com.josense.locktask.ui.page.create
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,9 +36,10 @@ import com.josense.locktask.R
 import com.josense.locktask.ui.components.TaskCreateButton
 import com.josense.locktask.ui.components.input.KeyboardInputSheet
 import com.josense.locktask.ui.theme.PageGap
-import com.josense.locktask.ui.theme.TextFieldPadding
 import com.josense.locktask.ui.theme.extendedTypography
 import org.koin.androidx.compose.koinViewModel
+
+private val INPUT_HORIZONTAL_PADDING = 12.dp
 
 @Composable
 fun CreateTaskSheet(onDismiss: () -> Unit, onCreated: (Int) -> Unit) {
@@ -102,13 +105,17 @@ internal fun CreateTaskInputs(
         onValueChange = { onAction(CreateTaskAction.DescriptionChanged(it)) },
         readOnly = readOnly,
         minLines = 2,
-        maxLines = 5,
+        maxLines = 8,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         modifier = Modifier.focusRequester(descriptionFocus)
             .testTag("create_task_description")
-            .fillMaxWidth().padding(TextFieldPadding),
+            .fillMaxWidth()
+            .padding(horizontal = PageGap)
+            .padding(bottom = 12.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.medium)
+            .padding(horizontal = INPUT_HORIZONTAL_PADDING, vertical = 10.dp),
         decorationBox = { innerTextField ->
             Box {
                 if (state.description.isEmpty()) {
@@ -151,7 +158,7 @@ fun TaskTitleInputField(
                 }
             }
             .fillMaxWidth()
-            .padding(TextFieldPadding),
+            .padding(horizontal = PageGap + INPUT_HORIZONTAL_PADDING, vertical = 6.dp),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
