@@ -1,6 +1,5 @@
 package com.josense.locktask.ui.components
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,7 @@ fun LockNotifyStatus(needLockNotify: Boolean) {
             if (needLockNotify) R.string.lock_notify_enabled
             else R.string.lock_notify_disabled
         ),
-        modifier = Modifier.padding(12.dp).size(24.dp),
+        modifier = Modifier.size(24.dp),
         tint = if (needLockNotify) colors.primary else colors.outline,
     )
 }

@@ -2,6 +2,7 @@ package com.josense.locktask.ui.page.home
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -177,21 +178,28 @@ fun TaskItem(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
             .background(
                 if (highlighted) MaterialTheme.colorScheme.secondaryContainer
                 else Color.Transparent
             )
-            .clickable(enabled = enabled) { onTaskClick(task) },
-        verticalAlignment = Alignment.CenterVertically,
+            .clickable(enabled = enabled) { onTaskClick(task) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
     ) {
         LockNotifyStatus(needLockNotify = task.needLockNotify)
-        Text(
-            text = task.title,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f).padding(vertical = 8.dp, horizontal = 4.dp),
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        TaskCreatedTime(createdAt = task.createAt, nowMillis = nowMillis)
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = task.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            TaskCreatedTime(createdAt = task.createAt, nowMillis = nowMillis)
+        }
     }
 }
