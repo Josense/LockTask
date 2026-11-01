@@ -11,7 +11,6 @@ import com.josense.locktask.notification.TaskNotificationSync
 import com.josense.locktask.ui.notification.NotificationDelegate
 import com.josense.locktask.ui.page.create.CreateTaskViewModel
 import com.josense.locktask.ui.page.home.HomeViewModel
-import com.josense.locktask.ui.page.task_detail.TaskDetailViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -62,5 +61,5 @@ val appModule = module {
     viewModelOf(::CreateTaskViewModel)
 
     viewModelOf(::HomeViewModel)
-    viewModelOf(::TaskDetailViewModel)
+    taskDetailModule()
 }

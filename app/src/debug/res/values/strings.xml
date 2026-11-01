@@ -1,0 +1,4 @@
+<resources>
+    <string name="debug_arm_save_failure">调试：模拟下次保存失败</string>
+    <string name="debug_cancel_save_failure">调试：取消模拟保存失败</string>
+</resources>

@@ -4,12 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.repository.TaskRepository
 import com.josense.locktask.ui.navigation.TaskDetail
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import java.util.Date
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TaskDetailViewModel(
@@ -18,25 +19,53 @@ class TaskDetailViewModel(
 ) : ViewModel() {
     private val taskDetailRoute = savedStateHandle.toRoute<TaskDetail>()
 
-    val taskListState: StateFlow<Task?> = taskRepository.getTaskById(taskDetailRoute.taskId)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+    private val mutableUiState = MutableStateFlow(TaskDetailState())
+    val uiState = mutableUiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            taskRepository.getTaskById(taskDetailRoute.taskId)
+                .collect { task ->
+                    mutableUiState.update { it.copy(task = task) }
+                }
+        }
+    }
 
     fun onAction(action: TaskDetailAction) {
-        when (action) {
-            TaskDetailAction.Complete -> {
-                viewModelScope.launch {
-                    taskRepository.completeTask(taskListState.value!!)
+        if (action == TaskDetailAction.DismissSaveError) {
+            mutableUiState.update { it.copy(saveFailed = false) }
+            return
+        }
+        if (mutableUiState.value.isSaving) return
+        val task = mutableUiState.value.task ?: return
+        mutableUiState.update {
+            it.copy(isSaving = true, saveFailed = false)
+        }
+        viewModelScope.launch {
+            try {
+                when (action) {
+                    TaskDetailAction.DismissSaveError -> Unit
+                    is TaskDetailAction.SetLockNotify -> {
+                        if (task.isDeleted.not()) {
+                            taskRepository.updateTask(
+                                task.copy(
+                                    needLockNotify = action.enabled,
+                                    updateAt = Date(),
+                                )
+                            )
+                        }
+                    }
+                    TaskDetailAction.Complete -> {
+                        taskRepository.completeTask(task)
+                        mutableUiState.update { it.copy(isFinished = true) }
+                    }
                 }
-            }
-
-            TaskDetailAction.Delete -> {
-                viewModelScope.launch {
-                    taskRepository.deleteTaskSoftly(taskListState.value!!)
-                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                mutableUiState.update { it.copy(saveFailed = true) }
+            } finally {
+                mutableUiState.update { it.copy(isSaving = false) }
             }
         }
     }

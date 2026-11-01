@@ -38,4 +38,8 @@
     <string name="notification_uri_host" translatable="false">task</string>
     <string name="notification_uri_key" translatable="false">notification</string>
     <string name="home_list_summary">已显示全部 %1$d 项任务</string>
+    <string name="task_detail_no_description">暂无描述</string>
+    <string name="task_detail_lock_notify">常驻锁屏</string>
+    <string name="task_detail_save_failed">保存失败，请重试</string>
+    <string name="task_detail_more">更多操作</string>
 </resources>
