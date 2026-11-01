@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.view.View
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -124,9 +126,12 @@ class AndroidTaskNotificationGateway(private val context: Context) :
                 .setShowWhen(false)
                 .setContentTitle(notification.title)
                 .setContentText(notification.content)
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(notification.content)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(
+                    contentView(notification, expanded = false)
+                )
+                .setCustomBigContentView(
+                    contentView(notification, expanded = true)
                 )
                 .setContentIntent(pendingIntent)
                 .setOngoing(true)
@@ -138,6 +143,20 @@ class AndroidTaskNotificationGateway(private val context: Context) :
                 .build()
         manager.notify(TAG_PREFIX + notification.key, NOTIFICATION_ID, built)
     }
+
+    private fun contentView(
+        notification: TaskNotification,
+        expanded: Boolean,
+    ): RemoteViews =
+        RemoteViews(context.packageName, R.layout.notification_task).apply {
+            setTextViewText(R.id.notification_title, notification.title)
+            setTextViewText(R.id.notification_body, notification.content)
+            setViewVisibility(
+                R.id.notification_body,
+                if (expanded && notification.content.isNotBlank()) View.VISIBLE
+                else View.GONE,
+            )
+        }
 
     override suspend fun cancel(key: String) {
         manager.cancel(TAG_PREFIX + key, NOTIFICATION_ID)
