@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Resolve in the notification host configuration instead of inheriting OEM text colors. -->
+    <color name="notification_text_primary">#DE000000</color>
+    <color name="notification_text_secondary">#99000000</color>
+</resources>
