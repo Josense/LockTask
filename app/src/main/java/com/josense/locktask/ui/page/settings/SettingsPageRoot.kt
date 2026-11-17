@@ -12,7 +12,6 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -24,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import com.josense.locktask.R
 import com.josense.locktask.domain.notification.NotificationAccess
 import com.josense.locktask.notification.presentation.R as NotificationR
+import com.josense.locktask.ui.page.settings.appearance.AppearanceSetting
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,10 +48,7 @@ fun SettingsPageRoot(
                 )
             }
             SettingsSection(stringResource(R.string.settings_section_general)) {
-                SettingsEntry(
-                    title = stringResource(R.string.settings_appearance),
-                    icon = Icons.Outlined.Palette,
-                )
+                AppearanceSetting()
             }
             SettingsSection(stringResource(R.string.settings_section_background)) {
                 SettingsEntry(

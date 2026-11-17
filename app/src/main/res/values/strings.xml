@@ -24,4 +24,8 @@
     <string name="settings_check_updates">检查更新</string>
     <string name="settings_feedback">反馈</string>
     <string name="settings_coming_soon">即将开放</string>
+    <string name="settings_appearance_system">系统默认设置</string>
+    <string name="settings_appearance_light">浅色</string>
+    <string name="settings_appearance_dark">深色</string>
+    <string name="settings_cancel">取消</string>
 </resources>
