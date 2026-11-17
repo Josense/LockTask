@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -36,4 +37,5 @@ val appModule = module {
         val repository = get<TaskRepository>()
         NotificationReminderLookup { taskId -> repository.getTaskById(taskId).first()?.needLockNotify == true }
     }
+
 }

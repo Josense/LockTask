@@ -7,3 +7,4 @@ data object Home
 
 @Serializable
 data class TaskDetail(val taskId: Int)
+

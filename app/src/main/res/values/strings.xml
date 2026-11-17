@@ -11,4 +11,17 @@
     <string name="settings_notifications">通知设置</string>
     <string name="settings_notifications_enabled">任务通知已开启</string>
     <string name="settings_background_description">查看后台运行授权说明，减少任务通知被系统清理</string>
+    <string name="settings_section_sync">数据同步</string>
+    <string name="settings_webdav">WebDAV 同步</string>
+    <string name="settings_webdav_description">使用自己的 WebDAV 服务同步任务</string>
+    <string name="settings_section_general">基础设置</string>
+    <string name="settings_section_background">后台设置</string>
+    <string name="settings_section_history">历史数据</string>
+    <string name="settings_section_about">关于</string>
+    <string name="settings_appearance">外观</string>
+    <string name="settings_cancelled_tasks">已取消的任务</string>
+    <string name="settings_completed_tasks">已完成的任务</string>
+    <string name="settings_check_updates">检查更新</string>
+    <string name="settings_feedback">反馈</string>
+    <string name="settings_coming_soon">即将开放</string>
 </resources>
