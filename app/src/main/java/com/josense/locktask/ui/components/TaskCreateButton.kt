@@ -5,8 +5,12 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,9 +36,13 @@ fun TaskCreateButton(
     val currentMode = stringResource(
         if (needLockNotify) R.string.lock_notify_label else R.string.in_app_only_label,
     )
-    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+    Row(
+        modifier = Modifier.height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
         Button(
             onClick = onCreate,
+            modifier = Modifier.weight(1f, fill = false).heightIn(min = 48.dp).fillMaxHeight(),
             enabled = enabled,
             shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 4.dp, bottomEnd = 4.dp),
         ) {
@@ -52,8 +60,11 @@ fun TaskCreateButton(
         }
         // 直接切换状态，不打开弹层，保留输入框焦点和软键盘。
         Button(
-            onClick = { onModeSelected(!needLockNotify) },
-            modifier = Modifier.width(48.dp).semantics { stateDescription = currentMode },
+            onClick = { onModeSelected(needLockNotify.not()) },
+            modifier = Modifier.width(48.dp).heightIn(min = 48.dp).fillMaxHeight().semantics {
+                stateDescription =
+                    currentMode
+            },
             contentPadding = PaddingValues(0.dp),
             shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 24.dp, bottomEnd = 24.dp),
         ) {

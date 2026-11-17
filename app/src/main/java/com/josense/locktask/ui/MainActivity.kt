@@ -2,7 +2,6 @@ package com.josense.locktask.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,16 +20,7 @@ class MainActivity : ComponentActivity() {
         val notifications: NotificationDelegate =
             getKoin().get { parametersOf(this@MainActivity) }
         installSplashScreen()
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(
-                android.graphics.Color.TRANSPARENT,
-                android.graphics.Color.TRANSPARENT,
-            ),
-            navigationBarStyle = SystemBarStyle.light(
-                android.graphics.Color.TRANSPARENT,
-                android.graphics.Color.TRANSPARENT,
-            ),
-        )
+        enableEdgeToEdge()
         setContent {
             LockTaskTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {

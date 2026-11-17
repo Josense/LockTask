@@ -38,7 +38,7 @@ internal fun LockNotifyToggleBar(checked: Boolean, enabled: Boolean, onCheckedCh
         label = "lockNotifyIconTint",
     )
 
-    Surface(tonalElevation = 3.dp) {
+    Surface(color = colors.surfaceContainer) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -68,7 +68,7 @@ internal fun LockNotifyToggleBar(checked: Boolean, enabled: Boolean, onCheckedCh
             Text(
                 text = stringResource(R.string.task_detail_lock_notify),
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.bodyLarge,
             )
             Switch(
                 checked = checked,

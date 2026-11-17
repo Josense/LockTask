@@ -1,6 +1,5 @@
 package com.josense.locktask.ui.page.create
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -114,7 +113,6 @@ internal fun CreateTaskInputs(
             .fillMaxWidth()
             .padding(horizontal = PageGap)
             .padding(bottom = 12.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.shapes.medium)
             .padding(horizontal = INPUT_HORIZONTAL_PADDING, vertical = 10.dp),
         decorationBox = { innerTextField ->
             Box {
