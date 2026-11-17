@@ -31,10 +31,15 @@ import com.josense.locktask.ui.notification.HomeEffect
 import com.josense.locktask.ui.notification.taskCreated
 import com.josense.locktask.ui.page.home.HomePageRoot
 import com.josense.locktask.ui.page.settings.SettingsPageRoot
+import com.josense.locktask.ui.page.settings.SyncSettingsSection
 import com.josense.locktask.ui.page.templates.TemplatesPageRoot
 
 @Composable
-fun MainPageRoot(notifications: NotificationController, onTaskClick: (Task) -> Unit) {
+fun MainPageRoot(
+    notifications: NotificationController,
+    onTaskClick: (Task) -> Unit,
+    syncSettings: @Composable () -> Unit = { SyncSettingsSection() },
+) {
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.Tasks) }
     val tabStates = rememberSaveableStateHolder()
     LaunchedEffect(notifications.state.target?.requestId) {
@@ -77,6 +82,7 @@ fun MainPageRoot(notifications: NotificationController, onTaskClick: (Task) -> U
                     )
                     MainTab.Templates -> TemplatesPageRoot()
                     MainTab.Settings -> SettingsPageRoot(
+                        syncSettings = syncSettings,
                         notificationAccess = notifications.state.access,
                         onNotificationSettings = {
                             notifications.onAction(NotificationAction.OpenNotificationSettings)

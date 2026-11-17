@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BatteryAlert
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.SystemUpdate
@@ -31,6 +30,7 @@ fun SettingsPageRoot(
     notificationAccess: NotificationAccess,
     onNotificationSettings: () -> Unit,
     onBackgroundSettings: () -> Unit,
+    syncSettings: @Composable () -> Unit = { SyncSettingsSection() },
 ) {
     val notificationStatus = when (notificationAccess) {
         NotificationAccess.Available -> R.string.settings_notifications_enabled
@@ -40,13 +40,7 @@ fun SettingsPageRoot(
     }
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_settings)) }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
-            SettingsSection(stringResource(R.string.settings_section_sync)) {
-                SettingsEntry(
-                    title = stringResource(R.string.settings_webdav),
-                    description = stringResource(R.string.settings_webdav_description),
-                    icon = Icons.Outlined.CloudSync,
-                )
-            }
+            syncSettings()
             SettingsSection(stringResource(R.string.settings_section_general)) {
                 AppearanceSetting()
             }

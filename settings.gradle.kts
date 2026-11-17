@@ -45,4 +45,3 @@ project(":core:designsystem").projectDir = file("core/designsystem")
 
 project(":task").projectDir = file("feature/task")
 project(":notification").projectDir = file("feature/notification")
-

@@ -11,3 +11,10 @@ local.properties
 
 # Gradle subproject outputs
 **/build/
+
+# Private cloud edition configuration and signing credentials
+**/google-services.json
+**/*service-account*.json
+*.jks
+*.keystore
+.kotlin/

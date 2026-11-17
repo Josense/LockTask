@@ -46,5 +46,4 @@ val appModule = module {
         val repository = get<TaskRepository>()
         NotificationReminderLookup { taskId -> repository.getTaskById(taskId).first()?.needLockNotify == true }
     }
-
 }
