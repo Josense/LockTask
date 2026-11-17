@@ -52,7 +52,7 @@ class TaskDetailNotificationRaceTest {
                 model.onAction(TaskDetailAction.FinishEditing)
             }
             withTimeout(5000) { readyToSave.await() }
-            TaskNotificationDismissalHandler(database.taskDao()).onDismissed(listOf(id))
+            TaskNotificationDismissalHandler(repository).onDismissed(listOf(id))
             continueSave.complete(Unit)
             val state = withTimeout(5000) {
                 model.uiState.first { it.isSaving.not() && it.edit == null && it.task?.title == "Edited" }

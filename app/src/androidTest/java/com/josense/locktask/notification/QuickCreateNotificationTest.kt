@@ -23,7 +23,10 @@ import com.josense.locktask.R
 import com.josense.locktask.data.database.dao.TaskDao
 import com.josense.locktask.data.model.toEntity
 import com.josense.locktask.domain.model.Task
+import com.josense.locktask.domain.notification.NotificationContract
 import com.josense.locktask.domain.repository.TaskRepository
+import com.josense.locktask.notification.data.R as NotificationDataR
+import com.josense.locktask.task.presentation.R as TaskR
 import com.josense.locktask.ui.MainActivity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -56,7 +59,7 @@ class QuickCreateNotificationTest {
                 it.notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0
             }.notification
             assertEquals(
-                context.getString(R.string.reminder_service_title),
+                context.getString(NotificationDataR.string.reminder_service_title),
                 notification.extras.getString(Notification.EXTRA_TITLE),
             )
             compose.onNodeWithTag("main_tab_Settings").performClick()
@@ -85,8 +88,8 @@ class QuickCreateNotificationTest {
         val id = runBlocking { repository.insertTask(Task(title = "Launch test", needLockNotify = false)) }
         val intent = Intent(context, MainActivity::class.java).apply {
             data = Uri.Builder()
-                .scheme(context.getString(R.string.notification_uri_scheme))
-                .authority(context.getString(R.string.notification_create_uri_host))
+                .scheme(NotificationContract.URI_SCHEME)
+                .authority(NotificationContract.CREATE_HOST)
                 .build()
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
@@ -94,14 +97,14 @@ class QuickCreateNotificationTest {
             compose.activityRule.scenario.close()
             context.applicationContext.startActivity(intent)
             awaitTitleFocus()
-            closeSheet(context.getString(R.string.dismiss_input_sheet))
+            closeSheet(context.getString(TaskR.string.dismiss_input_sheet))
             compose.onNodeWithTag("main_tab_Tasks").assertIsSelected()
         } finally {
             runBlocking { repository.getTaskById(id).first()?.let { dao.deletePhysically(it.toEntity()) } }
         }
     }
 
-    private fun closeSheet(label: String = compose.activity.getString(R.string.dismiss_input_sheet)) {
+    private fun closeSheet(label: String = compose.activity.getString(TaskR.string.dismiss_input_sheet)) {
         compose.onNodeWithContentDescription(label).performSemanticsAction(SemanticsActions.OnClick) { it() }
         compose.onNodeWithTag("create_task_title").assertDoesNotExist()
     }

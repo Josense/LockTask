@@ -24,13 +24,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.josense.locktask.domain.model.Task
-import com.josense.locktask.ui.notification.NotificationDelegate
+import com.josense.locktask.domain.notification.NotificationAction
+import com.josense.locktask.domain.notification.NotificationController
+import com.josense.locktask.ui.notification.AccessNotice
+import com.josense.locktask.ui.notification.HomeEffect
+import com.josense.locktask.ui.notification.taskCreated
 import com.josense.locktask.ui.page.home.HomePageRoot
 import com.josense.locktask.ui.page.settings.SettingsPageRoot
 import com.josense.locktask.ui.page.templates.TemplatesPageRoot
 
 @Composable
-fun MainPageRoot(notifications: NotificationDelegate, onTaskClick: (Task) -> Unit) {
+fun MainPageRoot(notifications: NotificationController, onTaskClick: (Task) -> Unit) {
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.Tasks) }
     val tabStates = rememberSaveableStateHolder()
     LaunchedEffect(notifications.state.target?.requestId) {
@@ -63,15 +67,22 @@ fun MainPageRoot(notifications: NotificationDelegate, onTaskClick: (Task) -> Uni
         Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             tabStates.SaveableStateProvider(selectedTab) {
                 when (selectedTab) {
-                    MainTab.Tasks -> HomePageRoot(onTaskClick = onTaskClick, notifications = notifications)
+                    MainTab.Tasks -> HomePageRoot(
+                        onTaskClick = onTaskClick,
+                        notificationEffects = { state, dispatch, create ->
+                            notifications.HomeEffect(state, dispatch, create)
+                        },
+                        notificationNotice = { state -> notifications.AccessNotice(state) },
+                        onTaskCreated = notifications::taskCreated,
+                    )
                     MainTab.Templates -> TemplatesPageRoot()
                     MainTab.Settings -> SettingsPageRoot(
                         notificationAccess = notifications.state.access,
                         onNotificationSettings = {
-                            notifications.onAction(NotificationDelegate.Action.OpenNotificationSettings)
+                            notifications.onAction(NotificationAction.OpenNotificationSettings)
                         },
                         onBackgroundSettings = {
-                            notifications.onAction(NotificationDelegate.Action.ShowBackgroundGuide)
+                            notifications.onAction(NotificationAction.ShowBackgroundGuide)
                         },
                     )
                 }

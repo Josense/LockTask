@@ -1,66 +1,39 @@
 package com.josense.locktask.di
 
-import androidx.activity.ComponentActivity
-import androidx.room.Room
-import com.josense.locktask.data.database.TaskDatabase
-import com.josense.locktask.data.notification.AndroidTaskNotificationGateway
+import com.josense.locktask.R
+import com.josense.locktask.data.notification.NotificationPlatformConfig
 import com.josense.locktask.data.notification.TaskNotificationDismissalHandler
-import com.josense.locktask.data.repository.TaskRepositoryImpl
 import com.josense.locktask.domain.notification.NotificationDismissalHandler
-import com.josense.locktask.domain.notification.TaskNotificationGateway
+import com.josense.locktask.domain.notification.NotificationReconciler
+import com.josense.locktask.domain.notification.NotificationReminderLookup
 import com.josense.locktask.domain.repository.TaskRepository
 import com.josense.locktask.notification.TaskNotificationSync
-import com.josense.locktask.ui.notification.NotificationDelegate
-import com.josense.locktask.ui.page.create.CreateTaskViewModel
-import com.josense.locktask.ui.page.home.HomeViewModel
+import com.josense.locktask.notification.data.di.notificationDataModule
+import com.josense.locktask.notification.presentation.di.notificationPresentationModule
+import com.josense.locktask.task.data.di.taskDataModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.koin.android.ext.koin.androidContext
+import kotlinx.coroutines.flow.first
 import org.koin.core.module.dsl.singleOf
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
+    includes(
+        taskDataModule,
+        taskPresentationModule,
+        notificationDataModule(NotificationPlatformConfig(R.mipmap.ic_launcher_monochrome), applicationScopeQualifier),
+        notificationPresentationModule,
+    )
     single<CoroutineScope>(applicationScopeQualifier) {
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     }
-
-    factory { (activity: ComponentActivity) ->
-        NotificationDelegate(
-            activity,
-            get(),
-            get(),
-            get<TaskNotificationSync>()::reconcile,
-        )
-    }
-
     singleOf(::TaskNotificationDismissalHandler) bind NotificationDismissalHandler::class
-
-    single<TaskNotificationGateway> {
-        AndroidTaskNotificationGateway(androidContext())
-    }
     single { TaskNotificationSync(get(), get(), get(applicationScopeQualifier)) }
-
-    // 任务数据库
-    single {
-        Room.databaseBuilder(
-            androidContext(),
-            TaskDatabase::class.java,
-            "task_database",
-        ).build()
+    single<NotificationReconciler> { NotificationReconciler(get<TaskNotificationSync>()::reconcile) }
+    single<NotificationReminderLookup> {
+        val repository = get<TaskRepository>()
+        NotificationReminderLookup { taskId -> repository.getTaskById(taskId).first()?.needLockNotify == true }
     }
-
-    // Dao 对象注入
-    single {
-        get<TaskDatabase>().taskDao()
-    }
-
-    singleOf(::TaskRepositoryImpl) bind TaskRepository::class
-
-    viewModelOf(::CreateTaskViewModel)
-
-    viewModelOf(::HomeViewModel)
-    taskDetailModule()
 }

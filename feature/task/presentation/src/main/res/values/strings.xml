@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_description">不错过任何重要的事情</string>
+    <string name="add_task_title_placeholder">有新的任务了吗</string>
+    <string name="lock_notify_label">锁屏常驻提醒</string>
+    <string name="lock_notify_enabled">锁屏提醒已开启</string>
+    <string name="lock_notify_disabled">锁屏提醒已关闭</string>
+    <string name="create_task">创建</string>
+    <string name="no_not_completed_task">没有待完成的任务</string>
+    <string name="complete">完成</string>
+    <string name="delete">删除</string>
+    <string name="back">返回</string>
+    <string name="task_detail">任务详情</string>
+    <string name="no_task">任务不见了</string>
+    <string name="input_sheet_title">输入</string>
+    <string name="dismiss_input_sheet">关闭输入面板</string>
+    <string name="create_with_lock_notify">创建并常驻锁屏</string>
+    <string name="create_in_app_only">仅创建任务</string>
+    <string name="in_app_only_label">仅应用内任务</string>
+    <string name="switch_to_in_app_only">切换为仅应用内任务</string>
+    <string name="switch_to_lock_notify">切换为锁屏常驻提醒</string>
+    <string name="create_task_failed">创建失败，请重试</string>
+    <string name="undo">撤销</string>
+    <string name="task_removed">已移除“%1$s”</string>
+    <string name="task_created_yesterday">昨天 %1$s</string>
+    <string name="home_list_summary">已显示全部 %1$d 项任务</string>
+    <string name="task_detail_no_description">暂无描述</string>
+    <string name="task_detail_lock_notify">常驻锁屏</string>
+    <string name="task_detail_save_failed">保存失败，请重试</string>
+    <string name="task_detail_more">更多操作</string>
+    <string name="task_action_failed">操作失败，请重试</string>
+    <string name="add_task_description_placeholder">添加描述（可选）</string>
+    <string name="task_detail_editing">编辑中</string>
+    <string name="task_detail_save">保存</string>
+    <string name="task_detail_saving">正在保存…</string>
+    <string name="task_title_required">标题不能为空</string>
+    <string name="task_list_title">LockTask</string>
+</resources>

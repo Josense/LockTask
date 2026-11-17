@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -39,6 +38,14 @@ android {
 }
 
 dependencies {
+    implementation(project(":task:domain"))
+    implementation(project(":task:data"))
+    implementation(project(":task:presentation"))
+    implementation(project(":notification:domain"))
+    implementation(project(":notification:data"))
+    implementation(project(":notification:presentation"))
+    implementation(project(":core:designsystem"))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.rive.android)
@@ -56,10 +63,8 @@ dependencies {
     // splash
     implementation(libs.androidx.core.splashscreen)
 
-    // room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
+    androidTestImplementation(libs.androidx.room.runtime)
+    androidTestImplementation(libs.androidx.room.ktx)
 
     // koin
     implementation(libs.io.insert.koin)

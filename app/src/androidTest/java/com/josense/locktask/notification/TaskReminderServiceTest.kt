@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.josense.locktask.data.database.dao.TaskDao
 import com.josense.locktask.data.model.toEntity
 import com.josense.locktask.data.notification.AndroidTaskNotificationGateway
+import com.josense.locktask.data.notification.NotificationPlatformConfig
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.repository.TaskRepository
 import com.josense.locktask.ui.MainActivity
@@ -40,7 +41,11 @@ class TaskReminderServiceTest {
             ).use { android.os.ParcelFileDescriptor.AutoCloseInputStream(it).readBytes() }
         }
         val manager = context.getSystemService(NotificationManager::class.java)
-        val gateway = AndroidTaskNotificationGateway(context)
+        val gateway =
+            AndroidTaskNotificationGateway(
+                context,
+                NotificationPlatformConfig(com.josense.locktask.R.mipmap.ic_launcher_monochrome),
+            )
         fun serviceNotifications() = manager.activeNotifications.filter {
             it.notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0
         }

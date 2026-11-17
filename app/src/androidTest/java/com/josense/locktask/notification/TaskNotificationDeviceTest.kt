@@ -10,6 +10,7 @@ import com.josense.locktask.R
 import com.josense.locktask.data.database.dao.TaskDao
 import com.josense.locktask.data.model.toEntity
 import com.josense.locktask.data.notification.AndroidTaskNotificationGateway
+import com.josense.locktask.data.notification.NotificationPlatformConfig
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.notification.TaskNotification
 import com.josense.locktask.domain.repository.TaskRepository
@@ -40,7 +41,11 @@ class TaskNotificationDeviceTest {
                         .readBytes()
                 }
         }
-        val gateway = AndroidTaskNotificationGateway(context)
+        val gateway =
+            AndroidTaskNotificationGateway(
+                context,
+                NotificationPlatformConfig(com.josense.locktask.R.mipmap.ic_launcher_monochrome),
+            )
         val manager =
             context.getSystemService(Context.NOTIFICATION_SERVICE)
                 as NotificationManager
@@ -140,7 +145,11 @@ class TaskNotificationDeviceTest {
         val dao = koin.get<TaskDao>()
         val sync = koin.get<TaskNotificationSync>()
         val manager = context.getSystemService(NotificationManager::class.java)
-        val gateway = AndroidTaskNotificationGateway(context)
+        val gateway =
+            AndroidTaskNotificationGateway(
+                context,
+                NotificationPlatformConfig(com.josense.locktask.R.mipmap.ic_launcher_monochrome),
+            )
         val firstId = repository.insertTask(Task(title = "Dismiss test", content = "Keep description"))
         val secondId = repository.insertTask(Task(title = "Keep notification"))
         try {

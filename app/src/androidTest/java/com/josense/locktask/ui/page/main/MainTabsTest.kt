@@ -11,6 +11,7 @@ import com.josense.locktask.data.database.dao.TaskDao
 import com.josense.locktask.data.model.toEntity
 import com.josense.locktask.domain.model.Task
 import com.josense.locktask.domain.repository.TaskRepository
+import com.josense.locktask.notification.presentation.R as NotificationR
 import com.josense.locktask.ui.MainActivity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -33,9 +34,15 @@ class MainTabsTest {
             compose.onNodeWithTag("main_tab_Settings").performClick().assertIsSelected()
             compose.activityRule.scenario.recreate()
             compose.onNodeWithTag("main_tab_Settings").assertIsSelected()
-            compose.onNodeWithText(compose.activity.getString(R.string.background_reminder_settings)).performClick()
-            compose.onNodeWithText(compose.activity.getString(R.string.background_reminder_guide)).assertIsDisplayed()
-            compose.onNodeWithText(compose.activity.getString(R.string.background_reminder_close)).performClick()
+            compose.onNodeWithText(
+                compose.activity.getString(NotificationR.string.background_reminder_settings),
+            ).performClick()
+            compose.onNodeWithText(
+                compose.activity.getString(NotificationR.string.background_reminder_guide),
+            ).assertIsDisplayed()
+            compose.onNodeWithText(
+                compose.activity.getString(NotificationR.string.background_reminder_close),
+            ).performClick()
             compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
             compose.onNodeWithTag("main_tab_Tasks").assertIsSelected()
         } finally {

@@ -4,14 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.josense.locktask.domain.notification.NotificationController
 import com.josense.locktask.ui.notification.BackgroundGuide
 import com.josense.locktask.ui.notification.NavigationEffect
-import com.josense.locktask.ui.notification.NotificationDelegate
 import com.josense.locktask.ui.page.main.MainPageRoot
 import com.josense.locktask.ui.page.task_detail.TaskDetailRoot
 
 @Composable
-fun HomeNavGraph(notifications: NotificationDelegate) {
+fun HomeNavGraph(notifications: NotificationController) {
     val navController = rememberNavController()
     notifications.NavigationEffect {
         navController.popBackStack<Home>(inclusive = false)

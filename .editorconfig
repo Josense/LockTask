@@ -25,9 +25,9 @@ ktlint_function_naming_ignore_when_annotated_with = Composable
 trim_trailing_whitespace = false
 
 # 保留现有 task_detail 包名，覆盖主代码、变体与测试；其他包遵循标准命名。
-[app/src/**/task_detail/*.kt]
+[**/src/**/task_detail/*.kt]
 ktlint_standard_package-name = disabled
 
 # 文件同时承载时间分类与日历规则，保留领域名称。
-[app/src/main/java/com/josense/locktask/domain/time/TaskTimeRule.kt]
+[feature/task/domain/src/main/java/com/josense/locktask/domain/time/TaskTimeRule.kt]
 ktlint_standard_filename = disabled

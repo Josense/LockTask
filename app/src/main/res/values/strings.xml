@@ -1,64 +1,8 @@
 <resources>
     <string name="app_name">LockTask</string>
-    <string name="app_description">不错过任何重要的事情</string>
     <string name="add_task_title_hint">Task</string>
-    <string name="add_task_title_placeholder">有新的任务了吗</string>
-    <string name="lock_notify_label">锁屏常驻提醒</string>
     <string name="lock_notify_description">在锁屏上保留此任务，直到完成或取消</string>
-    <string name="lock_notify_enabled">锁屏提醒已开启</string>
-    <string name="lock_notify_disabled">锁屏提醒已关闭</string>
-    <string name="create_task">创建</string>
-    <string name="no_not_completed_task">没有待完成的任务</string>
-    <string name="complete">完成</string>
-    <string name="delete">删除</string>
-    <string name="back">返回</string>
-    <string name="task_detail">任务详情</string>
-    <string name="no_task">任务不见了</string>
-    <string name="input_sheet_title">输入</string>
-    <string name="dismiss_input_sheet">关闭输入面板</string>
-    <string name="create_with_lock_notify">创建并常驻锁屏</string>
-    <string name="create_in_app_only">仅创建任务</string>
-    <string name="in_app_only_label">仅应用内任务</string>
     <string name="in_app_only_description">只保存在应用内，不显示锁屏提醒</string>
-    <string name="switch_to_in_app_only">切换为仅应用内任务</string>
-    <string name="switch_to_lock_notify">切换为锁屏常驻提醒</string>
-    <string name="create_task_failed">创建失败，请重试</string>
-    <string name="undo">撤销</string>
-    <string name="task_removed">已移除“%1$s”</string>
-    <string name="task_created_yesterday">昨天 %1$s</string>
-    <string name="task_notification_channel">常驻任务</string>
-    <string name="notification_permission_description">任务常驻锁屏需要开启通知权限</string>
-    <string name="notification_channel_disabled_description">任务常驻锁屏已关闭</string>
-    <string name="notification_app_disabled_description">应用通知已关闭</string>
-    <string name="notification_enable_action">开启通知权限</string>
-    <string name="notification_settings_action">前往设置</string>
-    <!-- Stable platform identifiers shared by notification publishing and UI. -->
-    <string name="notification_channel_id" translatable="false">persistent_tasks</string>
-    <string name="notification_uri_scheme" translatable="false">locktask</string>
-    <string name="notification_uri_host" translatable="false">task</string>
-    <string name="notification_uri_key" translatable="false">notification</string>
-    <string name="home_list_summary">已显示全部 %1$d 项任务</string>
-    <string name="task_detail_no_description">暂无描述</string>
-    <string name="task_detail_lock_notify">常驻锁屏</string>
-    <string name="task_detail_save_failed">保存失败，请重试</string>
-    <string name="task_detail_more">更多操作</string>
-    <string name="task_action_failed">操作失败，请重试</string>
-    <string name="add_task_description_placeholder">添加描述（可选）</string>
-    <string name="task_detail_editing">编辑中</string>
-    <string name="task_detail_save">保存</string>
-    <string name="task_detail_saving">正在保存…</string>
-    <string name="task_title_required">标题不能为空</string>
-    <string name="notification_dismiss_uri_scheme" translatable="false">locktask-dismiss</string>
-    <string name="notification_dismiss_uri_host" translatable="false">notification</string>
-    <string name="reminder_service_channel">提醒运行状态</string>
-    <string name="reminder_service_title">快速创建任务</string>
-    <string name="reminder_service_description">点击记录新任务 · 锁屏提醒运行中</string>
-    <string name="background_reminder_title">允许后台运行，保留任务提醒</string>
-    <string name="background_reminder_description">部分系统会在划掉应用时清除通知。请在系统设置中允许 LockTask 在后台运行。</string>
-    <string name="background_reminder_settings">后台运行设置</string>
-    <string name="background_reminder_dismiss">不再提醒</string>
-    <string name="background_reminder_guide">在应用信息中打开“耗电和后台”或“电池”，将后台管理改为“手动管理”，并开启“允许后台运行”。部分系统将此选项称为“不受限制”。\n\n不同手机的名称可能不同。仅忽略电池优化不一定能阻止系统清理；设置后可划掉应用，确认任务通知是否保留。\n\n应用无法可靠读取这项系统授权，请以系统设置和实际效果为准。</string>
-    <string name="background_reminder_close">知道了</string>
     <string name="tab_tasks">任务</string>
     <string name="tab_templates">模板</string>
     <string name="tab_settings">设置</string>
@@ -67,5 +11,4 @@
     <string name="settings_notifications">通知设置</string>
     <string name="settings_notifications_enabled">任务通知已开启</string>
     <string name="settings_background_description">查看后台运行授权说明，减少任务通知被系统清理</string>
-    <string name="notification_create_uri_host" translatable="false">create</string>
 </resources>

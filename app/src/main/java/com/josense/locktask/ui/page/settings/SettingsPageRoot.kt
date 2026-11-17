@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.josense.locktask.R
 import com.josense.locktask.domain.notification.NotificationAccess
+import com.josense.locktask.notification.presentation.R as NotificationR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,9 +31,9 @@ fun SettingsPageRoot(
 ) {
     val notificationStatus = when (notificationAccess) {
         NotificationAccess.Available -> R.string.settings_notifications_enabled
-        NotificationAccess.PermissionRequired -> R.string.notification_permission_description
-        NotificationAccess.AppDisabled -> R.string.notification_app_disabled_description
-        NotificationAccess.ChannelDisabled -> R.string.notification_channel_disabled_description
+        NotificationAccess.PermissionRequired -> NotificationR.string.notification_permission_description
+        NotificationAccess.AppDisabled -> NotificationR.string.notification_app_disabled_description
+        NotificationAccess.ChannelDisabled -> NotificationR.string.notification_channel_disabled_description
     }
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.tab_settings)) }) }) { padding ->
         Column(Modifier.padding(padding).verticalScroll(rememberScrollState())) {
@@ -45,7 +46,7 @@ fun SettingsPageRoot(
             )
             ListItem(
                 modifier = Modifier.clickable(onClick = onBackgroundSettings),
-                headlineContent = { Text(stringResource(R.string.background_reminder_settings)) },
+                headlineContent = { Text(stringResource(NotificationR.string.background_reminder_settings)) },
                 supportingContent = { Text(stringResource(R.string.settings_background_description)) },
                 leadingContent = { Icon(Icons.Outlined.BatteryAlert, contentDescription = null) },
                 trailingContent = { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null) },

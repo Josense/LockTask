@@ -1,0 +1,13 @@
+<resources>
+    <string name="notification_permission_description">任务常驻锁屏需要开启通知权限</string>
+    <string name="notification_channel_disabled_description">任务常驻锁屏已关闭</string>
+    <string name="notification_app_disabled_description">应用通知已关闭</string>
+    <string name="notification_enable_action">开启通知权限</string>
+    <string name="notification_settings_action">前往设置</string>
+    <string name="background_reminder_title">允许后台运行，保留任务提醒</string>
+    <string name="background_reminder_description">部分系统会在划掉应用时清除通知。请在系统设置中允许 LockTask 在后台运行。</string>
+    <string name="background_reminder_settings">后台运行设置</string>
+    <string name="background_reminder_dismiss">不再提醒</string>
+    <string name="background_reminder_guide">在应用信息中打开“耗电和后台”或“电池”，将后台管理改为“手动管理”，并开启“允许后台运行”。部分系统将此选项称为“不受限制”。\n\n不同手机的名称可能不同。仅忽略电池优化不一定能阻止系统清理；设置后可划掉应用，确认任务通知是否保留。\n\n应用无法可靠读取这项系统授权，请以系统设置和实际效果为准。</string>
+    <string name="background_reminder_close">知道了</string>
+</resources>
