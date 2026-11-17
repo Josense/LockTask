@@ -29,7 +29,7 @@ internal fun SettingsSection(title: String, content: @Composable ColumnScope.() 
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
         )
         content()
-        HorizontalDivider(Modifier.padding(horizontal = 16.dp))
+//        HorizontalDivider(Modifier.padding(horizontal = 16.dp))
     }
 }
 
